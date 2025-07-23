@@ -13,5 +13,5 @@ class CategoryForm(forms.ModelForm):
 
     def __init__(self, *args, **KWarg):
         super(CategoryForm, self).__init__(*args, **KWarg)
-        self.fields['name'].widget.attrs.update({'id':'name', 'name':'name',
+        self.fields['name'].widget.attrs.update({'id':'cat_name', 'name':'cat_name',
                 'class':'form-control', 'placeholder':'Input Category Name'}) 
