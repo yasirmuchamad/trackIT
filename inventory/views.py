@@ -1,27 +1,18 @@
-from django.shortcuts import render
-from .models import *
+from inventory.forms import CategoryForm
+from inventory.models import Category
+from django.urls import reverse_lazy
+from django.views.generic import ListView, CreateView
 
-# Create your views here.
-def listCategory(request):
-    category = Category.objects.all()
 
-    context = {
-        'title'     :'list category',
-        'categories':category,
-    }
+class CategoryListView(ListView):
+    model = Category
+    template_name = "inventory/category/list.html"
 
-    return render(request, 'inventory/category/list.html', context)
 
-def addCategory(request):
-    form = CotegoryForm(request.POST or None)
-    if request.methode == "POST":
-        if form.is_valid():
-            form.save()
-        return redirect('inventory:list_category')
+class CategoryCreateView(CreateView):
+    model = Category
+    form_class = CategoryForm
+    template_name = "inventory/category/create.html"
+    success_url = reverse_lazy('item_list')
+
     
-    context = {
-        'title':'Add New Category',
-        'forms':form,
-    }
-
-    return render(request, 'inventory/category/create.html', context)
