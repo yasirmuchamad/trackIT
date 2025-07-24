@@ -14,4 +14,10 @@ urlpatterns = [
     path('departement/update/<int:pk>', DepartementUpdateView.as_view(), name='update_departement'),
     path('departement/delete/<int:pk>', DepartementDeleteView.as_view(), name='delete_departement'),
     path('departement/export', departementToExcel, name='departement_to_excel'),
+
+    path('employee/', EmployeeListView.as_view(), name='list_employee'),
+    path('employee/create', EmployeeCreateView.as_view(), name='create_employee'),
+    path('employee/update/<int:pk>', EmployeeUpdateView.as_view(), name='update_employee'),
+    path('employee/delete/<int:pk>', EmployeeDeleteView.as_view(), name='delete_employee'),
+    path('employee/export', employeeToExcel, name='employee_to_excel'),
 ]

@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block content %}
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">{{ title }}</h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+          <!-- <div class="btn-group me-2">
+            <button type="button" class="btn btn-sm btn-outline-secondary">Export</button>
+            <button type="button" class="btn btn-sm btn-outline-secondary">Print</button>
+          </div> -->
+        </div>
+    </div>
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+          <label for="user" class="form-label">User</label>
+            {{ form.user }}
+        </div>
+        <div class="mb-3">
+          <label for="employee_id" class="form-label">Employee Number</label>
+            {{ form.employee_id }}
+        </div>
+        <div class="mb-3">
+          <label for="name" class="form-label">Employee Name</label>
+            {{ form.name }}
+        </div>
+        <div class="mb-3">
+          <label for="departement" class="form-label">Departement</label>
+            {{ form.departement }}
+        </div>
+        <div class="mb-3">
+          <label for="position" class="form-label">Position</label>
+            {{ form.position }}
+        </div>
+        <div class="mb-3">
+          <label for="email" class="form-label">Email</label>
+            {{ form.email }}
+        </div>
+        <div class="mb-3">
+          <label for="phone" class="form-label">Phone Number</label>
+            {{ form.phone }}
+        </div>
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-success  d-flex align-items-center justify-content-center mr-2"><ion-icon name="save-outline"> </ion-icon>Submit</button>
+          <button type="reset" class="btn btn-secondary d-flex align-items-center justify-content-center mr-2">
+            <ion-icon name="sync-outline"> </ion-icon>Clear</button>
+          <a href="{% url 'inventory:list_employee' %}" class="btn btn-danger d-flex align-items-center justify-content-center gap-1">
+              <ion-icon name="close-circle-outline"></ion-icon> Cancel
+          </a>
+        </div>
+      </form>
+{% endblock content %}

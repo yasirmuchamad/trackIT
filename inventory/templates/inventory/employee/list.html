@@ -19,14 +19,14 @@
         <h1 class="h2">{{ title }}</h1>
         <div class="btn-toolbar mb-2 mb-md-0">
           <div class="btn-group md-2">
-            <a href="{% url 'inventory:departement_to_excel' %}" class="btn btn-sm btn-secondary ex-tbl d-flex align-items-center justify-content-center mr-2"><ion-icon name="newspaper-outline"></ion-icon>Export</a>
+            <a href="{% url 'inventory:employee_to_excel' %}" class="btn btn-sm btn-secondary ex-tbl d-flex align-items-center justify-content-center mr-2"><ion-icon name="newspaper-outline"></ion-icon>Export</a>
             <!-- <button type="button" class="btn btn-sm btn-secondary ex-tbl d-flex align-items-center justify-content-center mr-2"> <ion-icon name="newspaper-outline"></ion-icon>Export</button> -->
             <button type="button" class="btn btn-sm btn-secondary ex-tbl d-flex align-items-center justify-content-center mr-2" onclick="printSection()" ><ion-icon name="print-outline"></ion-icon>Print</button>
           </div>
         </div>
     </div>
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom"">
-        <a href="{% url 'inventory:create_departement' %}" class="btn btn-sm btn-primary ex-tbl d-flex align-items-center justify-content-center mr-4"><ion-icon name="duplicate-outline"></ion-icon>Add</a>
+        <a href="{% url 'inventory:create_employee' %}" class="btn btn-sm btn-primary ex-tbl d-flex align-items-center justify-content-center mr-4"><ion-icon name="duplicate-outline"></ion-icon>Add</a>
         <input type="text" id="filter-input" class="form-control d-flex align-items-center justify-content-center mr-2" placeholder="Search">
     </div>
     <div class="table-responsive tbl-mt">
@@ -34,20 +34,28 @@
             <thead>
                 <tr>
                     <th id="number">No</th>
+                    <th>Employee Number</th>
+                    <th>Employee Name</th>
                     <th>Departement</th>
-                    <th>Leader Name</th>
+                    <th>Position</th>
+                    <th>Email</th>
+                    <th>Phone</th>
                     <th class="text-center">Action</th>
                 </tr>
             </thead>
             <tbody>
-                {% for d in object_list %}
+                {% for e in object_list %}
                 <tr>
                     <td>{{ forloop.counter }}</td>
-                    <td>{{ d.name }}</td>
-                    <td>{{ d.leader }}</td>
+                    <td>{{ e.employee_id }}</td>
+                    <td>{{ e.name }}</td>
+                    <td>{{ e.departement.name }}</td>
+                    <td>{{ e.position }}</td>
+                    <td>{{ e.email }}</td>
+                    <td>{{ e.phone }}</td>
                     <td class="d-flex align-items-center justify-content-center">
-                        <a href="{% url 'inventory:update_departement' d.id %}" class="btn btn-xs btn-outline-warning d-flex align-items-center justify-content-center mr-1"><ion-icon name="create-outline"></ion-icon>Update</a> | 
-                        <a href="{% url 'inventory:delete_departement' d.id %}" class="btn btn-xs btn-outline-danger d-flex align-items-center justify-content-center mr-1 text-center"><ion-icon name="trash-outline"></ion-icon>Delete</a>
+                        <a href="{% url 'inventory:update_employee' e.id %}" class="btn btn-xs btn-outline-warning d-flex align-items-center justify-content-center mr-1"><ion-icon name="create-outline"></ion-icon>Update</a> | 
+                        <a href="{% url 'inventory:delete_employee' e.id %}" class="btn btn-xs btn-outline-danger d-flex align-items-center justify-content-center mr-1 text-center"><ion-icon name="trash-outline"></ion-icon>Delete</a>
                     </td>
                 </tr>
                 {% endfor %}    

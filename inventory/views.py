@@ -3,8 +3,8 @@ from django.http import HttpResponse
 from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.contrib import messages
-from inventory.forms import CategoryForm, DepartementForm
-from inventory.models import Category, Departement
+from inventory.forms import CategoryForm, DepartementForm, EmployeeForm
+from inventory.models import Category, Departement, Employee
 from openpyxl.styles import Font, Alignment
 
 
@@ -152,5 +152,84 @@ def departementToExcel(request):
     # Response
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     response['Content-Disposition'] = 'attachment; filename=departement.xlsx'
+    wb.save(response)
+    return response
+
+##########################################################  views for employee
+class EmployeeListView(ListView):
+    model = Employee
+    template_name = "inventory/employee/list.html"
+
+    def get_context_data(self, **kwrags):
+        context = super().get_context_data(**kwrags)
+        context['title']="List Employee"
+        return context
+
+
+class EmployeeCreateView(CreateView):
+    model = Employee
+    form_class = EmployeeForm
+    template_name = "inventory/Employee/create.html"
+    success_url = reverse_lazy('inventory:list_employee')
+
+    def get_context_data(self, **kwrags):
+        context = super().get_context_data(**kwrags)
+        context['title']="Create Employee"
+        return context
+
+
+class EmployeeUpdateView(UpdateView):
+    model = Employee
+    form_class = EmployeeForm
+    template_name = "inventory/Employee/create.html"
+    success_url = reverse_lazy('inventory:list_employee')
+
+    def get_context_data(self, **kwrags):
+        context = super().get_context_data(**kwrags)
+        context['title']="Update Employee"
+        return context
+
+
+class EmployeeDeleteView(DeleteView):
+    model = Employee
+    template_name = "inventory/Employee/delete.html"
+    success_url = reverse_lazy('inventory:list_employee')
+
+    def delete(self, request, *args, **kwargs):
+        Employee = self.get_object()
+        messages.success(self.request, f"Employee '{Employee.name}' berhasil disimpan.")
+        return super().delete(request, *args, **kwargs)
+                                                    
+def employeeToExcel(request):
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "List Employee"
+
+    # Judul besar di baris 1
+    ws.merge_cells('A1:G1')  # gabungkan dari kolom A sampai B
+    ws['A1'] = "List Employee"
+    ws['A1'].font = Font(size=14, bold=True)
+    ws['A1'].alignment = Alignment(horizontal='center')
+
+    # Header
+    headers = ['Id', 'User', 'Employee Number', 'Name', 'Departement', 'Position', 'email', 'phone']
+    ws.append(headers)
+
+    # Data
+    for idx, s in enumerate(Employee.objects.all(), start=1):
+        ws.append([
+            idx,
+            s.user,
+            s.employee_id,
+            s.name,
+            s.departement.name,
+            s.position,
+            s.email,
+            s.phone,
+        ])
+
+    # Response
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename=Employee.xlsx'
     wb.save(response)
     return response
