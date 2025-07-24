@@ -1,9 +1,14 @@
-from inventory.forms import CategoryForm
-from inventory.models import Category
+import openpyxl
+from django.http import HttpResponse
 from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
+from django.contrib import messages
+from inventory.forms import CategoryForm
+from inventory.models import Category
+from openpyxl.styles import Font, Alignment
 
 
+##########################################################  views for category
 class CategoryListView(ListView):
     model = Category
     template_name = "inventory/category/list.html"
@@ -48,3 +53,33 @@ class CategoryDeleteView(DeleteView):
         messages.success(self.request, f"Category '{category.name}' berhasil disimpan.")
         return super().delete(request, *args, **kwargs)
                                                     
+def categoryToExcel(request):
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "List Category"
+
+    # Judul besar di baris 1
+    ws.merge_cells('A1:B1')  # gabungkan dari kolom A sampai B
+    ws['A1'] = "List Category"
+    ws['A1'].font = Font(size=14, bold=True)
+    ws['A1'].alignment = Alignment(horizontal='center')
+
+    # Header
+    headers = ['Id', 'Name']
+    ws.append(headers)
+
+    # Data
+    for idx, s in enumerate(Category.objects.all(), start=1):
+        ws.append([
+            idx,
+            s.name,
+        ])
+
+    # Response
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename=category.xlsx'
+    wb.save(response)
+    return response
+
+##########################################################  views for item
+

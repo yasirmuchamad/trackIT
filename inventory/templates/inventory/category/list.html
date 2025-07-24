@@ -4,7 +4,8 @@
         <h1 class="h2">{{ title }}</h1>
         <div class="btn-toolbar mb-2 mb-md-0">
           <div class="btn-group md-2">
-            <button type="button" class="btn btn-sm btn-secondary ex-tbl d-flex align-items-center justify-content-center mr-2"> <ion-icon name="newspaper-outline"></ion-icon>Export</button>
+            <a href="{% url 'inventory:category_to_excel' %}" class="btn btn-sm btn-secondary ex-tbl d-flex align-items-center justify-content-center mr-2"><ion-icon name="newspaper-outline"></ion-icon>Export</a>
+            <!-- <button type="button" class="btn btn-sm btn-secondary ex-tbl d-flex align-items-center justify-content-center mr-2"> <ion-icon name="newspaper-outline"></ion-icon>Export</button> -->
             <button type="button" class="btn btn-sm btn-secondary ex-tbl d-flex align-items-center justify-content-center mr-2"><ion-icon name="print-outline"></ion-icon>Print</button>
           </div>
         </div>
