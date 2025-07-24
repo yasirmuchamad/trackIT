@@ -14,16 +14,14 @@
         <div class="mb-3">
           <label for="name" class="form-label">Category Name</label>
             {{ form.name }}
-          <!-- <input type="text" class="form-control" id="name"> -->
         </div>
-        <!-- <div class="mb-3">
-          <label for="exampleInputPassword1" class="form-label">Password</label>
-          <input type="password" class="form-control" id="exampleInputPassword1">
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-success  d-flex align-items-center justify-content-center mr-2"><ion-icon name="save-outline"> </ion-icon>Submit</button>
+          <button type="reset" class="btn btn-secondary d-flex align-items-center justify-content-center mr-2">
+            <ion-icon name="sync-outline"> </ion-icon>Clear</button>
+          <a href="{% url 'inventory:list_category' %}" class="btn btn-danger d-flex align-items-center justify-content-center gap-1">
+              <ion-icon name="close-circle-outline"></ion-icon> Cancel
+          </a>
         </div>
-        <div class="mb-3 form-check">
-          <input type="checkbox" class="form-check-input" id="exampleCheck1">
-          <label class="form-check-label" for="exampleCheck1">Check me out</label>
-        </div> -->
-        <button type="submit" class="btn btn-primary">Submit</button>
       </form>
 {% endblock content %}

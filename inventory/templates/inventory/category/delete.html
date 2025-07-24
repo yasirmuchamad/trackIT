@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h2>Konfirmasi Hapus</h2>
+  <p>Apakah kamu yakin ingin menghapus item ini?</p>
+
+  <ul>
+    <li><strong>Nama:</strong> {{ object.name }}</li>
+    <li><strong>Deskripsi:</strong> {{ object.description }}</li>
+  </ul>
+
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Ya, Hapus</button>
+    <a href="{% url 'inventory:category_list' %}" class="btn btn-secondary">Batal</a>
+  </form>
+{% endblock %}
