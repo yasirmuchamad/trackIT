@@ -5,3 +5,7 @@ from .models import *
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ['name']
+
+@admin.register(Departement)
+class DepartementAdmin(admin.ModelAdmin):
+    list_display = ['name', 'leader']
