@@ -79,7 +79,7 @@ class Item(models.Model):
         """Meta definition for Produc_type."""
 
         verbose_name = 'Item'
-        verbose_name_plural = 'Utems'
+        verbose_name_plural = 'Items'
 
     def __str__(self):
         """Unicode representation of Produc_type."""

@@ -49,6 +49,7 @@
               <li class="nav-item">
                 <a class="nav-link active" aria-current="page" href="#">
                   <span data-feather="home" class="align-text-bottom"></span>
+                  <ion-icon name="home-outline" id="side-menu"></ion-icon>
                   Dashboard
                 </a>
               </li>
@@ -62,21 +63,21 @@
               <li class="nav-item">
                 <a class="nav-link {% if request.path == '/inventory/departement/' %}active{% endif %}" href="{% url 'inventory:list_departement' %}">
                   <span data-feather="shopping-cart" class="align-text-bottom"></span>
-                  <ion-icon name="create-outline"></ion-icon>
+                  <ion-icon name="business-outline" id="side-menu"></ion-icon>
                   Departement
                 </a>
               </li>
               <li class="nav-item">
                 <a class="nav-link {% if request.path == '/inventory/employee/' %}active{% endif %}" href="{% url 'inventory:list_employee' %}">
                   <span data-feather="users" class="align-text-bottom"></span>
-                  <ion-icon name="create-outline"></ion-icon>
+                  <ion-icon name="people-outline" id="side-menu"></ion-icon>
                   Employee
                 </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="#">
+                <a class="nav-link" href="{% url 'inventory:list_item' %}">
                   <span data-feather="bar-chart-2" class="align-text-bottom"></span>
-                  Reports
+                  Item
                 </a>
               </li>
               <li class="nav-item">

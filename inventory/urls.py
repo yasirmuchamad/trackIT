@@ -20,4 +20,10 @@ urlpatterns = [
     path('employee/update/<int:pk>', EmployeeUpdateView.as_view(), name='update_employee'),
     path('employee/delete/<int:pk>', EmployeeDeleteView.as_view(), name='delete_employee'),
     path('employee/export', employeeToExcel, name='employee_to_excel'),
+
+    path('item/', ItemListView.as_view(), name='list_item'),
+    path('item/create', ItemCreateView.as_view(), name='create_item'),
+    path('item/update/<int:pk>', ItemUpdateView.as_view(), name='update_item'),
+    path('item/delete/<int:pk>', ItemDeleteView.as_view(), name='delete_item'),
+    path('item/export', itemToExcel, name='item_to_excel'),
 ]

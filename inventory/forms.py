@@ -57,3 +57,36 @@ class EmployeeForm(forms.ModelForm):
                 'class':'form-control'})
         self.fields['phone'].widget.attrs.update({'id':'phone', 'name':'phone',
                 'class':'form-control'})
+
+class ItemForm(forms.ModelForm):
+    """Form definition for Iteme."""
+
+    class Meta:
+        """Meta definition for Itemeform."""
+
+        model = Item
+        # fields = '__all__'
+        exclude = ('entry_date',)
+
+    def __init__(self, *args, **KWarg):
+        super(ItemForm, self).__init__(*args, **KWarg)
+        self.fields['sku_code'].widget.attrs.update({'id':'sku_code', 'name':'sku_code',
+                'class':'form-control', 'placeholder':'example : pc-thtf-e500'}) 
+        self.fields['category'].widget.attrs.update({'id':'category', 'name':'category',
+                'class':'form-control'}) 
+        self.fields['name'].widget.attrs.update({'id':'name', 'name':'name',
+                'class':'form-control', 'placeholder':'Input Item Name'})
+        self.fields['brand'].widget.attrs.update({'id':'brand', 'name':'brand',
+                'class':'form-control', 'placeholder':'Input Brand'}) 
+        self.fields['model'].widget.attrs.update({'id':'model', 'name':'model',
+                'class':'form-control', 'placeholder':'example : Laserjet'})
+        self.fields['cpu'].widget.attrs.update({'id':'cpu', 'name':'cpu',
+                'class':'form-control', 'placeholder':'Input Processor'})
+        self.fields['ram'].widget.attrs.update({'id':'phone', 'name':'phone',
+                'class':'form-control', 'placeholder':'Input Memory Capacity'})
+        self.fields['storage'].widget.attrs.update({'id':'ram', 'name':'ram',
+                'class':'form-control', 'placeholder':'Input Storage'})
+        self.fields['display'].widget.attrs.update({'id':'display', 'name':'display',
+                'class':'form-control', 'placeholder':'Input Display Resolution'})
+        self.fields['os'].widget.attrs.update({'id':'os', 'name':'os',
+                'class':'form-control', 'placeholder':'Input Operating System'})

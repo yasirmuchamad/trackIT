@@ -3,8 +3,8 @@ from django.http import HttpResponse
 from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.contrib import messages
-from inventory.forms import CategoryForm, DepartementForm, EmployeeForm
-from inventory.models import Category, Departement, Employee
+from inventory.forms import CategoryForm, DepartementForm, EmployeeForm, ItemForm
+from inventory.models import Category, Departement, Employee, Item
 from openpyxl.styles import Font, Alignment
 
 
@@ -169,7 +169,7 @@ class EmployeeListView(ListView):
 class EmployeeCreateView(CreateView):
     model = Employee
     form_class = EmployeeForm
-    template_name = "inventory/Employee/create.html"
+    template_name = "inventory/employee/create.html"
     success_url = reverse_lazy('inventory:list_employee')
 
     def get_context_data(self, **kwrags):
@@ -181,7 +181,7 @@ class EmployeeCreateView(CreateView):
 class EmployeeUpdateView(UpdateView):
     model = Employee
     form_class = EmployeeForm
-    template_name = "inventory/Employee/create.html"
+    template_name = "inventory/employee/create.html"
     success_url = reverse_lazy('inventory:list_employee')
 
     def get_context_data(self, **kwrags):
@@ -192,7 +192,7 @@ class EmployeeUpdateView(UpdateView):
 
 class EmployeeDeleteView(DeleteView):
     model = Employee
-    template_name = "inventory/Employee/delete.html"
+    template_name = "inventory/employee/delete.html"
     success_url = reverse_lazy('inventory:list_employee')
 
     def delete(self, request, *args, **kwargs):
@@ -231,5 +231,88 @@ def employeeToExcel(request):
     # Response
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     response['Content-Disposition'] = 'attachment; filename=Employee.xlsx'
+    wb.save(response)
+    return response
+
+##########################################################  views for item
+class ItemListView(ListView):
+    model = Item
+    template_name = "inventory/item/list.html"
+
+    def get_context_data(self, **kwrags):
+        context = super().get_context_data(**kwrags)
+        context['title']="List Item"
+        return context
+
+
+class ItemCreateView(CreateView):
+    model = Item
+    form_class = ItemForm
+    template_name = "inventory/item/create.html"
+    success_url = reverse_lazy('inventory:list_employee')
+
+    def get_context_data(self, **kwrags):
+        context = super().get_context_data(**kwrags)
+        context['title']="Create Employee"
+        return context
+
+
+class ItemUpdateView(UpdateView):
+    model = Item
+    form_class = ItemForm
+    template_name = "inventory/item/create.html"
+    success_url = reverse_lazy('inventory:list_item')
+
+    def get_context_data(self, **kwrags):
+        context = super().get_context_data(**kwrags)
+        context['title']="Update Item"
+        return context
+
+
+class ItemDeleteView(DeleteView):
+    model = Item
+    template_name = "inventory/item/delete.html"
+    success_url = reverse_lazy('inventory:list_item')
+
+    def delete(self, request, *args, **kwargs):
+        Employee = self.get_object()
+        messages.success(self.request, f"Item '{Employee.name}' berhasil dihapus.")
+        return super().delete(request, *args, **kwargs)
+                                                    
+def itemToExcel(request):
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "List Item"
+
+    # Judul besar di baris 1
+    ws.merge_cells('A1:G1')  # gabungkan dari kolom A sampai B
+    ws['A1'] = "List Item"
+    ws['A1'].font = Font(size=14, bold=True)
+    ws['A1'].alignment = Alignment(horizontal='center')
+
+    # Header
+    headers = ['Id', 'SKU', 'Category', 'Name', 'Brand', 'Model', 'Cpu', 'Ram', 'Storage', 'Display', 'Os','Entry Date']
+    ws.append(headers)
+
+    # Data
+    for idx, s in enumerate(Employee.objects.all(), start=1):
+        ws.append([
+            idx,
+            s.sku,
+            s.category,
+            s.name,
+            s.brand,
+            s.model,
+            s.cpu,
+            s.ram,
+            s.storage,
+            s.display,
+            s.os,
+            s.entry_date,
+        ])
+
+    # Response
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename=Item.xlsx'
     wb.save(response)
     return response

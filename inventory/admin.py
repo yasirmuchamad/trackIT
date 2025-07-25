@@ -9,3 +9,11 @@ class CategoryAdmin(admin.ModelAdmin):
 @admin.register(Departement)
 class DepartementAdmin(admin.ModelAdmin):
     list_display = ['name', 'leader']
+
+@admin.register(Employee)
+class EmployeeAdmin(admin.ModelAdmin):
+    list_display = ['user', 'employee_id', 'name', 'departement', 'position', 'email', 'phone']
+
+@admin.register(Item)
+class ItemAdmin(admin.ModelAdmin):
+    list_display =  ['sku_code', 'category', 'name', 'brand', 'model', 'cpu', 'ram', 'storage', 'display', 'os','entry_date']
