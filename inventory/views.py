@@ -4,7 +4,7 @@ from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.contrib import messages
 from inventory.forms import CategoryForm, DepartementForm, EmployeeForm, ItemForm
-from inventory.models import Category, Departement, Employee, Item
+from inventory.models import Category, Departement, Employee, Item, ItemUnit
 from openpyxl.styles import Font, Alignment
 
 
@@ -272,6 +272,89 @@ class ItemUpdateView(UpdateView):
 class ItemDeleteView(DeleteView):
     model = Item
     template_name = "inventory/item/delete.html"
+    success_url = reverse_lazy('inventory:list_item')
+
+    def delete(self, request, *args, **kwargs):
+        Employee = self.get_object()
+        messages.success(self.request, f"Item '{Employee.name}' berhasil dihapus.")
+        return super().delete(request, *args, **kwargs)
+                                                    
+def itemToExcel(request):
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "List Item"
+
+    # Judul besar di baris 1
+    ws.merge_cells('A1:G1')  # gabungkan dari kolom A sampai B
+    ws['A1'] = "List Item"
+    ws['A1'].font = Font(size=14, bold=True)
+    ws['A1'].alignment = Alignment(horizontal='center')
+
+    # Header
+    headers = ['Id', 'SKU', 'Category', 'Name', 'Brand', 'Model', 'Cpu', 'Ram', 'Storage', 'Display', 'Os','Entry Date']
+    ws.append(headers)
+
+    # Data
+    for idx, s in enumerate(Employee.objects.all(), start=1):
+        ws.append([
+            idx,
+            s.sku,
+            s.category,
+            s.name,
+            s.brand,
+            s.model,
+            s.cpu,
+            s.ram,
+            s.storage,
+            s.display,
+            s.os,
+            s.entry_date,
+        ])
+
+    # Response
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename=Item.xlsx'
+    wb.save(response)
+    return response
+
+##########################################################  views for item
+class ItemUnitListView(ListView):
+    model = ItemUnit
+    template_name = "inventory/item_unit/list.html"
+
+    def get_context_data(self, **kwrags):
+        context = super().get_context_data(**kwrags)
+        context['title']="List Item Unit"
+        return context
+
+
+class ItemUnitCreateView(CreateView):
+    model = Item
+    form_class = ItemForm
+    template_name = "inventory/item_unit/create.html"
+    success_url = reverse_lazy('inventory:list_employee')
+
+    def get_context_data(self, **kwrags):
+        context = super().get_context_data(**kwrags)
+        context['title']="Create Employee"
+        return context
+
+
+class ItemUpdateView(UpdateView):
+    model = Item
+    form_class = ItemForm
+    template_name = "inventory/item_unit/create.html"
+    success_url = reverse_lazy('inventory:list_item')
+
+    def get_context_data(self, **kwrags):
+        context = super().get_context_data(**kwrags)
+        context['title']="Update Item"
+        return context
+
+
+class ItemDeleteView(DeleteView):
+    model = Item
+    template_name = "inventory/item_unit/delete.html"
     success_url = reverse_lazy('inventory:list_item')
 
     def delete(self, request, *args, **kwargs):

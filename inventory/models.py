@@ -89,8 +89,9 @@ class Item(models.Model):
 class ItemUnit(models.Model):
     """Model definition for Item."""
     item            = models.ForeignKey(Item, on_delete=models.CASCADE, related_name='units')
-    serial_number   = models.CharField(max_length=64, unique=True)
+    serial_number   = models.CharField(max_length=64, unique=True, blank=True, null=True)
     location        = models.CharField(max_length=100)
+    ip_address      = models.GenericIPAddressField(null=True, blank=True)
     status          = models.CharField(max_length=20, choices=[
         ('in_warehouse', 'In Warehouse'),
         ('in_use', 'In_Use'),

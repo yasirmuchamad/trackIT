@@ -6,12 +6,12 @@
 
   <ul>
     <li><strong>Nama:</strong> {{ object.name }}</li>
-    <li><strong>Deskripsi:</strong> {{ object.description }}</li>
+    <li><strong>Deskripsi:</strong> {{ object.leader }}</li>
   </ul>
 
   <form method="post">
     {% csrf_token %}
     <button type="submit" class="btn btn-danger">Ya, Hapus</button>
-    <a href="{% url 'inventory:list_category' %}" class="btn btn-secondary">Batal</a>
+    <a href="{% url 'inventory:list_item' %}" class="btn btn-secondary">Batal</a>
   </form>
 {% endblock %}
