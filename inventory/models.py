@@ -88,13 +88,14 @@ class Item(models.Model):
 
 class ItemUnit(models.Model):
     """Model definition for Item."""
+    asset_number    = models.CharField(max_length=16, unique=True)
     item            = models.ForeignKey(Item, on_delete=models.CASCADE, related_name='units')
     serial_number   = models.CharField(max_length=64, unique=True, blank=True, null=True)
     location        = models.CharField(max_length=100)
     ip_address      = models.GenericIPAddressField(null=True, blank=True)
     status          = models.CharField(max_length=20, choices=[
         ('in_warehouse', 'In Warehouse'),
-        ('in_use', 'In_Use'),
+        ('in_use', 'In Use'),
         ('borrowed', 'Borrowed'),
         ('damaged', 'Damaged')
     ])
@@ -109,8 +110,8 @@ class ItemUnit(models.Model):
     class Meta:
         """Meta definition for Item."""
 
-        verbose_name = 'Item'
-        verbose_name_plural = 'Items'
+        verbose_name = 'ItemUnit'
+        verbose_name_plural = 'ItemUnits'
 
     def __str__(self):
         """Unicode representation of Item."""

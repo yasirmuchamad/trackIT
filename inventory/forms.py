@@ -90,3 +90,31 @@ class ItemForm(forms.ModelForm):
                 'class':'form-control', 'placeholder':'Input Display Resolution'})
         self.fields['os'].widget.attrs.update({'id':'os', 'name':'os',
                 'class':'form-control', 'placeholder':'Input Operating System'})
+        
+
+class ItemUnitForm(forms.ModelForm):
+    """Form definition for Iteme."""
+
+    class Meta:
+        """Meta definition for Itemeform."""
+
+        model = ItemUnit
+        fields = '__all__'
+        # exclude = ('entry_date',)
+
+    def __init__(self, *args, **KWarg):
+        super(ItemUnitForm, self).__init__(*args, **KWarg)
+        self.fields['item'].widget.attrs.update({'id':'item', 'name':'item',
+                'class':'form-control'}) 
+        self.fields['serial_number'].widget.attrs.update({'id':'serial_number', 'name':'serial_number',
+                'class':'form-control', 'placeholder':'Input serial number'}) 
+        self.fields['location'].widget.attrs.update({'id':'location', 'name':'location',
+                'class':'form-control', 'placeholder':'Input Location'})
+        self.fields['ip_address'].widget.attrs.update({'id':'ip_address', 'name':'ip_address',
+                'class':'form-control', 'placeholder':'Input IP Address'}) 
+        self.fields['status'].widget.attrs.update({'id':'status', 'name':'status',
+                'class':'form-control'})
+        self.fields['condition'].widget.attrs.update({'id':'condition', 'name':'condition',
+                'class':'form-control'})
+        self.fields['current_user'].widget.attrs.update({'id':'current_user', 'name':'current_user',
+                'class':'form-control'})

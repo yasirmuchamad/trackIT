@@ -17,3 +17,7 @@ class EmployeeAdmin(admin.ModelAdmin):
 @admin.register(Item)
 class ItemAdmin(admin.ModelAdmin):
     list_display =  ['sku_code', 'category', 'name', 'brand', 'model', 'cpu', 'ram', 'storage', 'display', 'os','entry_date']
+
+@admin.register(ItemUnit)
+class ItemUnitAdmin(admin.ModelAdmin):
+    list_display =  ['item', 'serial_number', 'location', 'ip_address', 'status', 'condition', 'current_user']

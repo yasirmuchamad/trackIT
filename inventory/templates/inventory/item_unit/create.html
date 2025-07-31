@@ -24,46 +24,34 @@
     <form method="post">
         {% csrf_token %}
         <div class="mb-3">
-          <label for="sku_code" class="form-label">SKU</label>
-            {{ form.sku_code }}
+          <label for="item" class="form-label">Item</label>
+            {{ form.item }}
         </div>
         <div class="mb-3">
-          <label for="category" class="form-label">Category</label>
-            {{ form.category }}
+          <label for="serial_number class="form-label">Serial Number</label>
+            {{ form.serial_number }}
         </div>
         <div class="mb-3">
-          <label for="name" class="form-label">Item Name</label>
-            {{ form.name }}
+          <label for="location" class="form-label">Location</label>
+            {{ form.location }}
         </div>
         <div class="mb-3">
-          <label for="brand" class="form-label">Brand</label>
-            {{ form.brand }}
+          <label for="ip_address" class="form-label">IP Address</label>
+            {{ form.ip_address }}
         </div>
         <div class="mb-3">
-          <label for="model" class="form-label">Model</label>
-            {{ form.model }}
+          <label for="status" class="form-label">Status</label>
+            {{ form.status }}
         </div>
         <div class="mb-3">
-          <label for="cpu" class="form-label">Processor</label>
-            {{ form.cpu }}
+          <label for="condition" class="form-label">Condition</label>
+            {{ form.condition }}
         </div>
         <div class="mb-3">
-          <label for="ram" class="form-label">Memory</label>
-            {{ form.ram }}
+          <label for="current_user" class="form-label">Current User</label>
+            {{ form.current_user }}
         </div>
-        <div class="mb-3">
-          <label for="storage" class="form-label">Storage</label>
-            {{ form.storage }}
-        </div>
-        <div class="mb-3">
-          <label for="display" class="form-label">Display</label>
-            {{ form.display }}
-        </div>
-        <div class="mb-3">
-          <label for="os" class="form-label">Operating system</label>
-            {{ form.os }}
-        </div>
-        
+                
         <div class="d-flex gap-2">
           <button type="submit" class="btn btn-success  d-flex align-items-center justify-content-center mr-2"><ion-icon name="save-outline"> </ion-icon>Submit</button>
           <button type="reset" class="btn btn-secondary d-flex align-items-center justify-content-center mr-2">

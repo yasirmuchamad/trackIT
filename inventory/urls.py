@@ -26,4 +26,7 @@ urlpatterns = [
     path('item/update/<int:pk>', ItemUpdateView.as_view(), name='update_item'),
     path('item/delete/<int:pk>', ItemDeleteView.as_view(), name='delete_item'),
     path('item/export', itemToExcel, name='item_to_excel'),
+
+    path('item_unit/', ItemUnitListView.as_view(), name='list_item_unit'),
+    path('item_unit/create', ItemUnitCreateView.as_view(), name='create_item_unit'),
 ]

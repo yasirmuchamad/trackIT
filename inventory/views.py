@@ -3,7 +3,7 @@ from django.http import HttpResponse
 from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.contrib import messages
-from inventory.forms import CategoryForm, DepartementForm, EmployeeForm, ItemForm
+from inventory.forms import CategoryForm, DepartementForm, EmployeeForm, ItemForm, ItemUnitForm
 from inventory.models import Category, Departement, Employee, Item, ItemUnit
 from openpyxl.styles import Font, Alignment
 
@@ -321,22 +321,29 @@ def itemToExcel(request):
 class ItemUnitListView(ListView):
     model = ItemUnit
     template_name = "inventory/item_unit/list.html"
+    context_object_name = 'item_units'
 
     def get_context_data(self, **kwrags):
         context = super().get_context_data(**kwrags)
-        context['title']="List Item Unit"
+        context['title']='List Device'
+        context['item_unit_with_status_label']=[
+            {
+                'condition':itemunit.get_status_display(),
+            }
+            for itemunit in context['item_units']
+        ]
         return context
 
 
 class ItemUnitCreateView(CreateView):
-    model = Item
-    form_class = ItemForm
+    model = ItemUnit
+    form_class = ItemUnitForm
     template_name = "inventory/item_unit/create.html"
     success_url = reverse_lazy('inventory:list_employee')
 
     def get_context_data(self, **kwrags):
         context = super().get_context_data(**kwrags)
-        context['title']="Create Employee"
+        context['title']="Create New Product"
         return context
 
 
