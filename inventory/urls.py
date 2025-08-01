@@ -29,4 +29,7 @@ urlpatterns = [
 
     path('item_unit/', ItemUnitListView.as_view(), name='list_item_unit'),
     path('item_unit/create', ItemUnitCreateView.as_view(), name='create_item_unit'),
+    path('item_unit/update/<int:pk>', ItemUnitUpdateView.as_view(), name='update_item_unit'),
+    path('item_unit/delete/<int:pk>', ItemUnitDeleteView.as_view(), name='delete_item_unit'),
+    path('item_unit/export', itemunitToExcel, name='item_unit_to_excel'),
 ]

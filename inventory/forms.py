@@ -104,6 +104,8 @@ class ItemUnitForm(forms.ModelForm):
 
     def __init__(self, *args, **KWarg):
         super(ItemUnitForm, self).__init__(*args, **KWarg)
+        self.fields['asset_number'].widget.attrs.update({'id':'asset_number', 'name':'asset_number',
+                'class':'form-control', 'placeholder':'Example : GTI-PC-0001'}) 
         self.fields['item'].widget.attrs.update({'id':'item', 'name':'item',
                 'class':'form-control'}) 
         self.fields['serial_number'].widget.attrs.update({'id':'serial_number', 'name':'serial_number',

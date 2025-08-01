@@ -26,7 +26,7 @@
         </div>
     </div>
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom"">
-        <a href="{% url 'inventory:create_item' %}" class="btn btn-sm btn-primary ex-tbl d-flex align-items-center justify-content-center mr-4"><ion-icon name="duplicate-outline"></ion-icon>Add</a>
+        <a href="{% url 'inventory:create_item_unit' %}" class="btn btn-sm btn-primary ex-tbl d-flex align-items-center justify-content-center mr-4"><ion-icon name="duplicate-outline"></ion-icon>Add</a>
         <input type="text" id="filter-input" class="form-control d-flex align-items-center justify-content-center mr-2" placeholder="Search">
     </div>
     <div class="table-responsive tbl-mt">
@@ -34,6 +34,7 @@
             <thead>
                 <tr>
                     <th id="number">No</th>
+                    <th>Asset Number</th>
                     <th>Item Name</th>
                     <th>Serial Number</th>
                     <th>Location</th>
@@ -48,6 +49,7 @@
                 {% for i in object_list %}
                 <tr>
                     <td>{{ forloop.counter }}</td>
+                    <td>{{ i.asset_number }}</td>
                     <td>{{ i.item.name }}</td>
                     <td>{{ i.serial_number }}</td>
                     <td>{{ i.location }}</td>
@@ -56,8 +58,8 @@
                     <td>{{ i.get_condition_display }}</td>
                     <td>{{ i.current_user.name }}</td>
                     <td class="d-flex align-items-center justify-content-center">
-                        <a href="{% url 'inventory:update_item' i.id %}" class="btn btn-xs btn-outline-warning d-flex align-items-center justify-content-center mr-1"><ion-icon name="create-outline"></ion-icon>Update</a> | 
-                        <a href="{% url 'inventory:delete_item' i.id %}" class="btn btn-xs btn-outline-danger d-flex align-items-center justify-content-center mr-1 text-center"><ion-icon name="trash-outline"></ion-icon>Delete</a>
+                        <a href="{% url 'inventory:update_item_unit' i.id %}" class="btn btn-xs btn-outline-warning d-flex align-items-center justify-content-center mr-1"><ion-icon name="create-outline"></ion-icon>Update</a> | 
+                        <a href="{% url 'inventory:delete_item_unit' i.id %}" class="btn btn-xs btn-outline-danger d-flex align-items-center justify-content-center mr-1 text-center"><ion-icon name="trash-outline"></ion-icon>Delete</a>
                     </td>
                 </tr>
                 {% endfor %}    

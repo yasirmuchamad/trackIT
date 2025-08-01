@@ -295,7 +295,7 @@ def itemToExcel(request):
     ws.append(headers)
 
     # Data
-    for idx, s in enumerate(Employee.objects.all(), start=1):
+    for idx, s in enumerate(Item.objects.all(), start=1):
         ws.append([
             idx,
             s.sku,
@@ -343,66 +343,63 @@ class ItemUnitCreateView(CreateView):
 
     def get_context_data(self, **kwrags):
         context = super().get_context_data(**kwrags)
-        context['title']="Create New Product"
+        context['title']="Add New Device"
         return context
 
 
-class ItemUpdateView(UpdateView):
-    model = Item
-    form_class = ItemForm
+class ItemUnitUpdateView(UpdateView):
+    model = ItemUnit
+    form_class = ItemUnitForm
     template_name = "inventory/item_unit/create.html"
-    success_url = reverse_lazy('inventory:list_item')
+    success_url = reverse_lazy('inventory:list_item_unit')
 
     def get_context_data(self, **kwrags):
         context = super().get_context_data(**kwrags)
-        context['title']="Update Item"
+        context['title']="Update Device"
         return context
 
 
-class ItemDeleteView(DeleteView):
-    model = Item
+class ItemUnitDeleteView(DeleteView):
+    model = ItemUnit
     template_name = "inventory/item_unit/delete.html"
-    success_url = reverse_lazy('inventory:list_item')
+    success_url = reverse_lazy('inventory:list_item_unit')
 
     def delete(self, request, *args, **kwargs):
         Employee = self.get_object()
-        messages.success(self.request, f"Item '{Employee.name}' berhasil dihapus.")
+        messages.success(self.request, f"Device '{Employee.name}' berhasil dihapus.")
         return super().delete(request, *args, **kwargs)
                                                     
-def itemToExcel(request):
+def itemunitToExcel(request):
     wb = openpyxl.Workbook()
     ws = wb.active
-    ws.title = "List Item"
+    ws.title = "List Device"
 
     # Judul besar di baris 1
     ws.merge_cells('A1:G1')  # gabungkan dari kolom A sampai B
-    ws['A1'] = "List Item"
+    ws['A1'] = "List Device"
     ws['A1'].font = Font(size=14, bold=True)
     ws['A1'].alignment = Alignment(horizontal='center')
 
     # Header
-    headers = ['Id', 'SKU', 'Category', 'Name', 'Brand', 'Model', 'Cpu', 'Ram', 'Storage', 'Display', 'Os','Entry Date']
+    headers = ['Id', 'Asset Number', 'Item', 'Serial Number', 'Location', 'IP Address', 'Status', 'Condition', 'User']
     ws.append(headers)
 
     # Data
-    for idx, s in enumerate(Employee.objects.all(), start=1):
+    for idx, s in enumerate(ItemUnit.objects.all(), start=1):
         ws.append([
             idx,
-            s.sku,
-            s.category,
-            s.name,
-            s.brand,
-            s.model,
-            s.cpu,
-            s.ram,
-            s.storage,
-            s.display,
-            s.os,
-            s.entry_date,
+            s.asset_number,
+            s.item.name,
+            s.serial_number,
+            s.location,
+            s.ip_address,
+            s.status,
+            s.condition,
+            s.user,
         ])
 
     # Response
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    response['Content-Disposition'] = 'attachment; filename=Item.xlsx'
+    response['Content-Disposition'] = 'attachment; filename=Device.xlsx'
     wb.save(response)
     return response

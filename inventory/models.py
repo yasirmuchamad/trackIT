@@ -41,7 +41,7 @@ class Employee(models.Model):
 
     def __str__(self):
         """Unicode representation of Employee."""
-        return f"{self.name} ({self.employee_id})"
+        return f"{self.employee_id} - {self.name}"
 
 class Category(models.Model):
     """Model definition for Category."""

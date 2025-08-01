@@ -2,16 +2,16 @@
 
 {% block content %}
   <h2>Konfirmasi Hapus</h2>
-  <p>Apakah kamu yakin ingin menghapus item ini?</p>
+  <p>Apakah kamu yakin ingin menghapus Device ini?</p>
 
   <ul>
-    <li><strong>Nama:</strong> {{ object.name }}</li>
-    <li><strong>Deskripsi:</strong> {{ object.leader }}</li>
+    <li><strong>Asset Number:</strong> {{ object.asset_number }}</li>
+    <li><strong>Deskripsi:</strong> {{ object.item.name }}</li>
   </ul>
 
   <form method="post">
     {% csrf_token %}
     <button type="submit" class="btn btn-danger">Ya, Hapus</button>
-    <a href="{% url 'inventory:list_item' %}" class="btn btn-secondary">Batal</a>
+    <a href="{% url 'inventory:list_item_unit' %}" class="btn btn-secondary">Batal</a>
   </form>
 {% endblock %}
