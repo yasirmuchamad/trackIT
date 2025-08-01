@@ -298,8 +298,9 @@ def itemToExcel(request):
     for idx, s in enumerate(Item.objects.all(), start=1):
         ws.append([
             idx,
-            s.sku,
-            s.category,
+            s.sku_code,
+            # s.category,
+            str(s.category) if s.category else '',
             s.name,
             s.brand,
             s.model,
@@ -308,7 +309,9 @@ def itemToExcel(request):
             s.storage,
             s.display,
             s.os,
-            s.entry_date,
+            s.entry_date.replace(tzinfo=None) if s.entry_date else ''
+            # s.entry_date,
+
         ])
 
     # Response
@@ -395,7 +398,8 @@ def itemunitToExcel(request):
             s.ip_address,
             s.status,
             s.condition,
-            s.user,
+            str(s.current_user) if s.current_user else '',
+            # s.current_user,
         ])
 
     # Response
