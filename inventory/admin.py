@@ -6,6 +6,10 @@ from .models import *
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ['name']
 
+@admin.register(Location)
+class LocationAdmin(admin.ModelAdmin):
+    list_display = ['name', 'area']
+
 @admin.register(Departement)
 class DepartementAdmin(admin.ModelAdmin):
     list_display = ['name', 'leader']

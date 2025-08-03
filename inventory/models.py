@@ -85,13 +85,29 @@ class Item(models.Model):
         """Unicode representation of Produc_type."""
         return f"{self.name} {self.brand} {self.model }"
 
+class Location(models.Model):
+    """Model definition for Location."""
+
+    # TODO: Define fields here
+    name = models.CharField(max_length=64)
+    area = models.CharField(max_length=64)
+    class Meta:
+        """Meta definition for Location."""
+
+        verbose_name = 'Location'
+        verbose_name_plural = 'Locations'
+
+    def __str__(self):
+        """Unicode representation of Location."""
+        return f"{self.area} {self.name}"
+
 
 class ItemUnit(models.Model):
     """Model definition for Item."""
     asset_number    = models.CharField(max_length=16, unique=True)
     item            = models.ForeignKey(Item, on_delete=models.CASCADE, related_name='units')
     serial_number   = models.CharField(max_length=64, unique=True, blank=True, null=True)
-    location        = models.CharField(max_length=100)
+    location        = models.ForeignKey(Location, on_delete=models.CASCADE)
     ip_address      = models.GenericIPAddressField(null=True, blank=True)
     status          = models.CharField(max_length=20, choices=[
         ('in_warehouse', 'In Warehouse'),
