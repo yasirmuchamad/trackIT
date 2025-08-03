@@ -8,7 +8,7 @@ class CategoryAdmin(admin.ModelAdmin):
 
 @admin.register(Location)
 class LocationAdmin(admin.ModelAdmin):
-    list_display = ['name', 'area']
+    list_display = ['name',]
 
 @admin.register(Departement)
 class DepartementAdmin(admin.ModelAdmin):

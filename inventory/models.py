@@ -85,12 +85,31 @@ class Item(models.Model):
         """Unicode representation of Produc_type."""
         return f"{self.name} {self.brand} {self.model }"
 
+class Area(models.Model):
+    """Model definition for Area."""
+
+    # TODO: Define fields here
+    name = models.CharField(max_length=64)
+    mainterval = models.PositiveIntegerField(default=6)
+
+    class Meta:
+        """Meta definition for Area."""
+
+        verbose_name = 'Area'
+        verbose_name_plural = 'Areas'
+
+    def __str__(self):
+        """Unicode representation of Area."""
+        pass
+
+
 class Location(models.Model):
     """Model definition for Location."""
 
     # TODO: Define fields here
     name = models.CharField(max_length=64)
-    area = models.CharField(max_length=64)
+    area = models.ForeignKey(Area, on_delete=models.SET_NULL, null=True)
+
     class Meta:
         """Meta definition for Location."""
 
