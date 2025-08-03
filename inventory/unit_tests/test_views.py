@@ -84,3 +84,44 @@ class ViewTestCase(TestCase):
     def test_item_unit_excel_export(self):
         response = self.client.get(reverse('inventory:item_unit_to_excel'))
         self.assertEqual(response.status_code, 200)
+
+class ItemUnitViewTests(TestCase):
+    def setUp(self):
+        # Buat user login dulu jika viewnya pakai @login_required
+        self.user = User.objects.create_user(username='tester', password='pass')
+        self.client.login(username='tester', password='pass')
+         # Buat kategori dulu karena item membutuhkan category
+        self.category = Category.objects.create(name='Laptop')
+        
+        # Buat item dulu karena ItemUnit membutuhkan foreign key item
+        self.item = Item.objects.create(
+            name='Lenovo ThinkPad',
+            # barcode='123456789',
+            category=self.category,
+        )
+        self.item_unit = ItemUnit.objects.create(
+            asset_number='GTI-PC-0033',
+            item=self.item,
+            location='Compleks', 
+            status='in_use',
+            condition= 'good',
+        )
+
+    def test_create_item_unit(self):
+        url = reverse('inventory:create_item_unit')  # sesuaikan dengan urls.py
+        data = {'asset_number': 'GTI-PC-0029', 'item':self.item.id, 'location':'Compleks', 'status':'in_use', 'condition': 'good',}
+        response = self.client.post(url, data)
+        if response.status_code == 200:
+            print("CREATE FORM ERRORS:", response.context['form'].errors)
+        self.assertEqual(response.status_code, 302)  # redirect sukses
+        self.assertTrue(ItemUnit.objects.filter(asset_number='GTI-PC-0029').exists())
+
+    def test_update_item_unit(self):
+        url = reverse('inventory:update_item_unit', args=[self.item_unit.pk])
+        data = {'asset_number': 'GTI-PC-0029', 'item':self.item.id, 'location':'Compleks', 'status':'in_use', 'condition': 'good',}
+        response = self.client.post(url, data)
+        if response.status_code == 200:
+            print("CREATE FORM ERRORS:", response.context['form'].errors)
+        self.assertEqual(response.status_code, 302)
+        self.item_unit.refresh_from_db()
+        self.assertEqual(self.item_unit.asset_number, 'GTI-PC-0029')
