@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recap Maintenance</title>
+</head>
+<body>
+    <form action="" method="get">
+        <select name="status" id="" onchange="this.form.submit()">
+            <option value="">-- Filter Status --</option>
+            <option value="scheduled">Scheduled</option>
+            <option value="missed">Completed</option>
+            <option value="missed">missed</option>
+        </select>
+    </form>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Item</th>
+                <th>Lokasi</th>
+                <th>Teknisi</th>
+                <th>Tanggal</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            
+            {% for s in schedules %}
+                
+                <tr>
+                    <td>{{ s.item_unit }}</td>
+                    <td>{{s.item_unit.location}}</td>
+                    <td>{{ s.technician }}</td>
+                    <td>{{s.scheduled_date }}</td>
+                    <td>{{s.get_status_display }}</td>
+                </tr>
+            {% endfor %}
+                
+        </tbody>
+    </table>
+</body>
+</html>

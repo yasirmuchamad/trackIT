@@ -6,9 +6,13 @@ from .models import *
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ['name']
 
+@admin.register(Area)
+class AreaAdmin(admin.ModelAdmin):
+    list_display = ['name', 'mainterval']
+
 @admin.register(Location)
 class LocationAdmin(admin.ModelAdmin):
-    list_display = ['name',]
+    list_display = ['name', 'area']
 
 @admin.register(Departement)
 class DepartementAdmin(admin.ModelAdmin):
@@ -24,4 +28,4 @@ class ItemAdmin(admin.ModelAdmin):
 
 @admin.register(ItemUnit)
 class ItemUnitAdmin(admin.ModelAdmin):
-    list_display =  ['item', 'serial_number', 'location', 'ip_address', 'status', 'condition', 'current_user']
+    list_display =  ['asset_number', 'item', 'serial_number', 'location', 'ip_address', 'status', 'condition', 'current_user']

@@ -100,7 +100,7 @@ class Area(models.Model):
 
     def __str__(self):
         """Unicode representation of Area."""
-        pass
+        return f"{self.name} {self.mainterval}"
 
 
 class Location(models.Model):
@@ -150,4 +150,4 @@ class ItemUnit(models.Model):
 
     def __str__(self):
         """Unicode representation of Item."""
-        return f"{self.serial_number}"
+        return f"{self.asset_number}"
