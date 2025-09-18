@@ -22,4 +22,6 @@ app_name = 'maintenance'
 urlpatterns = [
     # path('', views.listMaintenance, name='list_schedule')
     path('', views.MaintenanceRecapView.as_view(), name='list_recap'),
+    path('update/<int:pk>', views.update_maintenance, name='update_maintanance'),
+    
 ]

@@ -1,11 +1,11 @@
 from django import forms
 from .models import MaintenanceSchedule
 
-class MaintenanceUpdateForm(forms.Form):
+class MaintenanceUpdateForm(forms.ModelForm):
     """MaintenanceUpdateForm definition."""
 
     # TODO: Define form fields here
     class Meta:
-        models=MaintenanceSchedule
+        model=MaintenanceSchedule
         fields=['performed_date', 'status', 'notes']
         
