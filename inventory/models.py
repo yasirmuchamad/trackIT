@@ -151,3 +151,5 @@ class ItemUnit(models.Model):
     def __str__(self):
         """Unicode representation of Item."""
         return f"{self.asset_number}"
+
+    
