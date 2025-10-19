@@ -145,3 +145,58 @@ class Employee_address(models.Model):
     def __str__(self):
         """Unicode representation of Employee_address."""
         return f"{self.employee}-{self.address_type}-{self.address}-{self.village}-{self.district}-{self.city}-{self.province}"
+
+class Employee_family(models.Model):
+    """Model definition for Employee_family."""
+    FAMILY_RELATION = [
+        ('child', 'Child'),
+        ('father_in_law', 'Father_in_law'),
+        ('mother', 'Wife'),
+        ('mother_in_law', 'Mother_in_law')
+        ('spouse', 'Spouse'),
+    ]
+
+    SEX = [
+        ('male', 'Male'),
+        ('female', 'Female'),
+    ]
+
+    # TODO: Define fields here
+    employee        = models.ForeignKey(Employee, on_delete=models.CASCADE)
+    name            = models.CharField(max_length=100)
+    sex             = models.CharField(max_length=6, choices=SEX)
+    relationship    = models.CharField(max_length=10, choices=FAMILY_RELATION)
+    date_of_birth   = models.DateField()
+    class Meta:
+        """Meta definition for Employee_family."""
+
+        verbose_name = 'Employee_family'
+        verbose_name_plural = 'Employee_familys'
+
+    def __str__(self):
+        """Unicode representation of Employee_family."""
+        return f"{self.employee}-{self.relation}-{self.name}-{self.date_of_birth}"
+    
+class Employee_studied(models.Model):
+    """Model definition for Employee_studied."""
+
+    # TODO: Define fields here
+    employee            = models.ForeignKey(Employee, on_delete=models.CASCADE)
+    institution_name    = models.CharField(max_length=100)
+    graduation_year     = models.PositiveSmallIntegerField(
+                            validators=[MinValueValidator(1900), MaxValueValidator(2100)],
+                            null=True,
+                            blank=True
+                        )
+    major               = models.CharField(max_length=100, null=True, blank=True)
+    degree              = models.CharField(max_length=8, null=True, blank=True)
+    class Meta:
+        """Meta definition for Employee_studied."""
+
+        verbose_name = 'Employee_studied'
+        verbose_name_plural = 'Employee_studieds'
+
+    def __str__(self):
+        """Unicode representation of Employee_studied."""
+        return f"{self.employee}-{self.institution_name}-{self.graduation_year}-{self.major}-{self.degree}"
+
