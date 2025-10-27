@@ -200,3 +200,38 @@ class Employee_studied(models.Model):
         """Unicode representation of Employee_studied."""
         return f"{self.employee}-{self.institution_name}-{self.graduation_year}-{self.major}-{self.degree}"
 
+class Position(models.Model):
+    """Model definition for Position."""
+
+    # TODO: Define fields here
+    name    = models.CharField(max_length=64)
+    level   = models.CharField(max_length=6, null=True, blank=True)
+    grade   = models.CharField(max_length=3, null=True, blank=True)
+    class Meta:
+        """Meta definition for Position."""
+
+        verbose_name = 'Position'
+        verbose_name_plural = 'Positions'
+
+    def __str__(self):
+        """Unicode representation of Position."""
+        return f"{self.name}{self.level}{self.grade}"
+
+
+class Employee_history(models.Model):
+    """Model definition for Employee_history."""
+
+    # TODO: Define fields here
+    employee            = models.ForeignKey(Employee, on_delete=models.CASCADE)
+    subdepartement      = models.ForeignKey(Subdepartement, ondelete=models.CASCADE)
+    position            = models.ForeignKey(Position, on_delete=models.CASCADE)
+    grade               = models.CharField(max_length=3, null=True, blank=True)
+    class Meta:
+        """Meta definition for Employee_history."""
+
+        verbose_name = 'Employee_history'
+        verbose_name_plural = 'Employee_historys'
+
+    def __str__(self):
+        """Unicode representation of Employee_history."""
+        pass
