@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 # Create your models here.
 class Unit(models.Model):
@@ -17,7 +18,7 @@ class Unit(models.Model):
 
     def __str__(self):
         """Unicode representation of Unit."""
-        return f"{self.name}"
+        return self.name
 
 
 class Departement(models.Model):
@@ -25,7 +26,7 @@ class Departement(models.Model):
 
     # TODO: Define fields here
     name    = models.CharField(max_length=20) 
-    unit    = models.ForeignKey(Unit, on_delete=models.CASCADE)
+    unit    = models.ForeignKey(Unit, on_delete=models.CASCADE, related_name='departements')
     class Meta:
         """Meta definition for Departement."""
 
@@ -34,14 +35,14 @@ class Departement(models.Model):
 
     def __str__(self):
         """Unicode representation of Departement."""
-        return f"{self.name}{self.unit}"
+        return f"{self.name} - {self.unit.name}"
     
 class Subdepartement(models.Model):
     """Model definition for Subdepartement."""
 
     # TODO: Define fields here
     name        = models.CharField(max_length=64)
-    departement = models.ForeignKey(Departement, on_delete=models.CASCADE)
+    departement = models.ForeignKey(Departement, on_delete=models.CASCADE, related_name='subdepartements')
     class Meta:
         """Meta definition for Subdepartement."""
 
@@ -50,7 +51,7 @@ class Subdepartement(models.Model):
 
     def __str__(self):
         """Unicode representation of Subdepartement."""
-        return f"{self.models}{self.departement}"
+        return f"{self.name} - {self.departement.name}"
     
 class Employee(models.Model):
     """Model definition for Employee."""
@@ -90,22 +91,28 @@ class Employee(models.Model):
         ('o-', 'O-'),
     ]
     # TODO: Define fields here
-    employee_id         = models.PositiveBigIntegerField()
+    employee_id         = models.PositiveBigIntegerField(unique=True)
     name                = models.CharField(max_length=100)
     join_date           = models.DateField()
     employment_status   = models.CharField(max_length=10, choices=EMPLOYMENT_STATUS)
-    permanent_date      = models.DateField()
+    permanent_date      = models.DateField(null=True, blank=True)
+
     place_of_birth      = models.CharField(max_length=64)
     date_of_birth       = models.DateField()
+
     religion            = models.CharField(max_length=10, choices=RELIGION)
     sex                 = models.CharField(max_length=6, choices=SEX)
     marital_status      = models.CharField(max_length=10, choices=MARITAL_STATUS)
-    national_id_number  = models.CharField(max_length=16)
-    family_card_number  = models.CharField(max_length=16)
+
+    national_id_number  = models.CharField(max_length=16, validators=[MinLenthValidator(16)])
+    family_card_number  = models.CharField(max_length=16, validators=[MinLengthValidator(16)])
     bpjs_employment     = models.CharField(max_length=16)
-    bpjs_healt          = models.CharField(max_length=16)
+    bpjs_health         = models.CharField(max_length=16)
+
     tax_id              = models.CharField(max_length=16, null=True, blank=True)
+
     blood_type          = models.CharField(max_length=3, choices=BLOOD_TYPE)
+
     phone               = models.CharField(max_length=16)
     private_mail        = models.EmailField(null=True, blank=True)
     company_mail        = models.EmailField(null=True, blank=True)
@@ -118,17 +125,17 @@ class Employee(models.Model):
 
     def __str__(self):
         """Unicode representation of Employee."""
-        return f"{self.employee_id}-{self.name}-{self.employment_status}-{self.sex}-{self.blood_type}-{self.phone}-{self.private_mail}"
+        return f"{self.employee_id} - {self.name}"
 
 
-class Employee_address(models.Model):
+class EmployeeAddress(models.Model):
     """Model definition for Employee_address."""
     ADDRESS_TYPE = [
-        ('registered_address', 'Registered_address'),
-        ('current_address', 'Current_address'),
+        ('registered', 'Registered Address'),
+        ('current', 'Current Address'),
     ]
     # TODO: Define fields here
-    employee        = models.ForeignKey(Employee, on_delete=models.CASCADE)
+    employee        = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='addresses')
     address_type    = models.CharField(max_length=20, choices=ADDRESS_TYPE)
     address         = models.CharField(max_length=120)
     village         = models.CharField(max_length=32)
@@ -139,20 +146,20 @@ class Employee_address(models.Model):
     class Meta:
         """Meta definition for Employee_address."""
 
-        verbose_name = 'Employee_address'
-        verbose_name_plural = 'Employee_addresss'
+        verbose_name = 'Employee Address'
+        verbose_name_plural = 'Employee Addresses'
 
     def __str__(self):
         """Unicode representation of Employee_address."""
-        return f"{self.employee}-{self.address_type}-{self.address}-{self.village}-{self.district}-{self.city}-{self.province}"
+        return f"{self.employee.name} - {self.address_type} - {self.address}"
 
-class Employee_family(models.Model):
+class EmployeeFamily(models.Model):
     """Model definition for Employee_family."""
     FAMILY_RELATION = [
         ('child', 'Child'),
-        ('father_in_law', 'Father_in_law'),
+        ('father_in_law', 'Father-in-law'),
         ('mother', 'Wife'),
-        ('mother_in_law', 'Mother_in_law')
+        ('mother_in_law', 'Mother-in-law'),
         ('spouse', 'Spouse'),
     ]
 
@@ -162,10 +169,10 @@ class Employee_family(models.Model):
     ]
 
     # TODO: Define fields here
-    employee        = models.ForeignKey(Employee, on_delete=models.CASCADE)
+    employee        = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='families')
     name            = models.CharField(max_length=100)
     sex             = models.CharField(max_length=6, choices=SEX)
-    relationship    = models.CharField(max_length=10, choices=FAMILY_RELATION)
+    relationship    = models.CharField(max_length=15, choices=FAMILY_RELATION)
     date_of_birth   = models.DateField()
     class Meta:
         """Meta definition for Employee_family."""
@@ -175,13 +182,13 @@ class Employee_family(models.Model):
 
     def __str__(self):
         """Unicode representation of Employee_family."""
-        return f"{self.employee}-{self.relation}-{self.name}-{self.date_of_birth}"
+        return f"{self.employee.name} - {self.relationship} - {self.name}"
     
-class Employee_studied(models.Model):
+class EmployeeStudied(models.Model):
     """Model definition for Employee_studied."""
 
     # TODO: Define fields here
-    employee            = models.ForeignKey(Employee, on_delete=models.CASCADE)
+    employee            = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='educations')
     institution_name    = models.CharField(max_length=100)
     graduation_year     = models.PositiveSmallIntegerField(
                             validators=[MinValueValidator(1900), MaxValueValidator(2100)],
@@ -193,12 +200,12 @@ class Employee_studied(models.Model):
     class Meta:
         """Meta definition for Employee_studied."""
 
-        verbose_name = 'Employee_studied'
-        verbose_name_plural = 'Employee_studieds'
+        verbose_name = 'Employee  Studied'
+        verbose_name_plural = 'Employee Studied Record'
 
     def __str__(self):
         """Unicode representation of Employee_studied."""
-        return f"{self.employee}-{self.institution_name}-{self.graduation_year}-{self.major}-{self.degree}"
+        return f"{self.employee.name} - {self.institution_name}"
 
 class Position(models.Model):
     """Model definition for Position."""
@@ -215,23 +222,31 @@ class Position(models.Model):
 
     def __str__(self):
         """Unicode representation of Position."""
-        return f"{self.name}{self.level}{self.grade}"
+        level = f" L{self.level}" if self.level else ""
+        grade = f" G{self.grade}" if self.grade else ""
+        return f"{self.name}{level}{grade}"
 
 
-class Employee_history(models.Model):
+class EmployeeHistory(models.Model):
     """Model definition for Employee_history."""
 
     # TODO: Define fields here
-    employee            = models.ForeignKey(Employee, on_delete=models.CASCADE)
-    subdepartement      = models.ForeignKey(Subdepartement, ondelete=models.CASCADE)
+    employee            = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='history')
+    subdepartement      = models.ForeignKey(Subdepartement, on_delete=models.CASCADE, related_name='employee_histories')
     position            = models.ForeignKey(Position, on_delete=models.CASCADE)
     grade               = models.CharField(max_length=3, null=True, blank=True)
+    start_date = models.DateField()
+    end_date = models.DateField(null=True, blank=True)
+
+    is_active = models.BooleanField(default=True)
+
     class Meta:
         """Meta definition for Employee_history."""
 
-        verbose_name = 'Employee_history'
-        verbose_name_plural = 'Employee_historys'
+        verbose_name = 'Employee History'
+        verbose_name_plural = 'Employee Histories'
+        ordering = ['-start_date']
 
     def __str__(self):
         """Unicode representation of Employee_history."""
-        pass
+        return f"{self.employee.name} - {self.position.name} - {self.start_date}"
