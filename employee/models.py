@@ -1,5 +1,5 @@
 from django.db import models
-from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.validators import MinValueValidator, MaxValueValidator, MinLengthValidator
 
 # Create your models here.
 class Unit(models.Model):
@@ -21,7 +21,7 @@ class Unit(models.Model):
         return self.name
 
 
-class Departement(models.Model):
+class Department(models.Model):
     """Model definition for Departement."""
 
     # TODO: Define fields here
@@ -37,12 +37,12 @@ class Departement(models.Model):
         """Unicode representation of Departement."""
         return f"{self.name} - {self.unit.name}"
     
-class Subdepartement(models.Model):
+class Subdepartment(models.Model):
     """Model definition for Subdepartement."""
 
     # TODO: Define fields here
     name        = models.CharField(max_length=64)
-    departement = models.ForeignKey(Departement, on_delete=models.CASCADE, related_name='subdepartements')
+    department = models.ForeignKey(Department, on_delete=models.CASCADE, related_name='subdepartements')
     class Meta:
         """Meta definition for Subdepartement."""
 
@@ -104,7 +104,7 @@ class Employee(models.Model):
     sex                 = models.CharField(max_length=6, choices=SEX)
     marital_status      = models.CharField(max_length=10, choices=MARITAL_STATUS)
 
-    national_id_number  = models.CharField(max_length=16, validators=[MinLenthValidator(16)])
+    national_id_number  = models.CharField(max_length=16, validators=[MinLengthValidator(16)])
     family_card_number  = models.CharField(max_length=16, validators=[MinLengthValidator(16)])
     bpjs_employment     = models.CharField(max_length=16)
     bpjs_health         = models.CharField(max_length=16)
@@ -157,8 +157,9 @@ class EmployeeFamily(models.Model):
     """Model definition for Employee_family."""
     FAMILY_RELATION = [
         ('child', 'Child'),
+        ('father', 'Father')
+        ('mother', 'Mother'),
         ('father_in_law', 'Father-in-law'),
-        ('mother', 'Wife'),
         ('mother_in_law', 'Mother-in-law'),
         ('spouse', 'Spouse'),
     ]
@@ -177,8 +178,8 @@ class EmployeeFamily(models.Model):
     class Meta:
         """Meta definition for Employee_family."""
 
-        verbose_name = 'Employee_family'
-        verbose_name_plural = 'Employee_familys'
+        verbose_name = 'Employee Family'
+        verbose_name_plural = 'Employee Families'
 
     def __str__(self):
         """Unicode representation of Employee_family."""
@@ -200,8 +201,8 @@ class EmployeeStudied(models.Model):
     class Meta:
         """Meta definition for Employee_studied."""
 
-        verbose_name = 'Employee  Studied'
-        verbose_name_plural = 'Employee Studied Record'
+        verbose_name = 'Employee Education'
+        verbose_name_plural = 'Employee Education Record'
 
     def __str__(self):
         """Unicode representation of Employee_studied."""

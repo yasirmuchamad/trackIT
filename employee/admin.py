@@ -13,3 +13,11 @@ class DepartementAdmin(admin.ModelAdmin):
 @admin.register(Subdepartement)
 class SubdepartementAdmin(admin.ModelAdmin):
     list_display = ['name', 'departement']
+
+@admin.register(Employee)
+class EmployeeAdmin(admin.ModelAdmin):
+    list_display = ['employee_id', 'name', 'join_date', 'employment_status']
+
+@admin.register(Employee)
+class EmployeeAddressAdmin(admin.ModelAdmin):
+    list_display = ['employee_id', 'name', 'join_date', 'employment_status']
