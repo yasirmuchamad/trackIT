@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator, MinLengthValidator
+from django.core.exceptions import ValidationError
 
 # Create your models here.
 class Unit(models.Model):
@@ -149,6 +150,25 @@ class Employee(models.Model):
         """Unicode representation of Employee."""
         return f"{self.employee_id} - {self.name}"
 
+    def clean(self):
+        # employee sudah keluar
+        if not self.is_active:
+            if not self.exit_date:
+                raise ValidationError(
+                    "Edit date must fill, if employee is not active"
+                    )
+            if not self.exit_type:
+                raise ValidationError(
+                    "Edit date must fill, if employee is not active"
+                    )
+            
+        # Employee masih aktif
+        if self.is_active:
+            if self.exit_date or self.exit_type:
+                raise ValidationError(
+                    "Employee active can't have exit date."
+                )
+
 
 class EmployeeAddress(models.Model):
     """Model definition for Employee_address."""
@@ -255,13 +275,13 @@ class EmployeeHistory(models.Model):
 
     # TODO: Define fields here
     employee            = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='history')
-    subdepartment      = models.ForeignKey(Subdepartment, on_delete=models.CASCADE, related_name='employee_histories')
+    subdepartment       = models.ForeignKey(Subdepartment, on_delete=models.CASCADE, related_name='employee_histories')
     position            = models.ForeignKey(Position, on_delete=models.CASCADE)
     grade               = models.CharField(max_length=3, null=True, blank=True)
-    start_date = models.DateField()
-    end_date = models.DateField(null=True, blank=True)
+    start_date          = models.DateField()
+    end_date            = models.DateField(null=True, blank=True)
 
-    is_active = models.BooleanField(default=True)
+    is_active           = models.BooleanField(default=True)
 
     class Meta:
         """Meta definition for Employee_history."""
