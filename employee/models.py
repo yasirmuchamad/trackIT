@@ -90,6 +90,13 @@ class Employee(models.Model):
         ('o+', 'O+'),
         ('o-', 'O-'),
     ]
+
+    EXIT_TYPE = [
+        ('resign', 'Resign'),   #Inisiatif Employee sendiri
+        ('terminated', 'Terminated'),   #Diberhentikan
+        ('retired', 'Retired')  #Pensiun
+    ]
+
     # TODO: Define fields here
     employee_id         = models.PositiveBigIntegerField(unique=True)
     name                = models.CharField(max_length=100)
@@ -116,6 +123,21 @@ class Employee(models.Model):
     phone               = models.CharField(max_length=16)
     private_mail        = models.EmailField(null=True, blank=True)
     company_mail        = models.EmailField(null=True, blank=True)
+
+    is_active           = models.BooleanField(default=True)
+    exit_date           = models.DateField(null=True, 
+                                           blank=True,
+                                           help_text="Tanggal resmi keluar"
+                                           )
+    exit_type           = models.CharField(max_length=15,
+                                           choices=EXIT_TYPE,
+                                           null=True,
+                                           blank=True
+                                           )
+    exit_reason         = models.CharField(max_length=100,
+                                           null=True,
+                                           blank=True
+                                           )
     
     class Meta:
         """Meta definition for Employee."""
@@ -157,7 +179,7 @@ class EmployeeFamily(models.Model):
     """Model definition for Employee_family."""
     FAMILY_RELATION = [
         ('child', 'Child'),
-        ('father', 'Father')
+        ('father', 'Father'),
         ('mother', 'Mother'),
         ('father_in_law', 'Father-in-law'),
         ('mother_in_law', 'Mother-in-law'),
@@ -233,7 +255,7 @@ class EmployeeHistory(models.Model):
 
     # TODO: Define fields here
     employee            = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='history')
-    subdepartement      = models.ForeignKey(Subdepartement, on_delete=models.CASCADE, related_name='employee_histories')
+    subdepartment      = models.ForeignKey(Subdepartment, on_delete=models.CASCADE, related_name='employee_histories')
     position            = models.ForeignKey(Position, on_delete=models.CASCADE)
     grade               = models.CharField(max_length=3, null=True, blank=True)
     start_date = models.DateField()

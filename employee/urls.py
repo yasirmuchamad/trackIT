@@ -8,4 +8,5 @@ urlpatterns = [
     # path('category/update/<int:pk>', CategoryUpdateView.as_view(), name='update_category'),
     # path('category/delete/<int:pk>', CategoryDeleteView.as_view(), name='delete_category'),
     # path('category/export', categoryToExcel, name='category_to_excel'),
+    
 ]

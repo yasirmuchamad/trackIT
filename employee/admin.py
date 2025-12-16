@@ -6,18 +6,14 @@ from .models import *
 class UnitAdmin(admin.ModelAdmin):
     list_display = ['name']
 
-@admin.register(Departement)
-class DepartementAdmin(admin.ModelAdmin):
+@admin.register(Department)
+class DepartmentAdmin(admin.ModelAdmin):
     list_display = ['name', 'unit']
 
-@admin.register(Subdepartement)
-class SubdepartementAdmin(admin.ModelAdmin):
-    list_display = ['name', 'departement']
+@admin.register(Subdepartment)
+class SubdepartmentAdmin(admin.ModelAdmin):
+    list_display = ['name', 'department']
 
 @admin.register(Employee)
 class EmployeeAdmin(admin.ModelAdmin):
-    list_display = ['employee_id', 'name', 'join_date', 'employment_status']
-
-@admin.register(Employee)
-class EmployeeAddressAdmin(admin.ModelAdmin):
     list_display = ['employee_id', 'name', 'join_date', 'employment_status']
