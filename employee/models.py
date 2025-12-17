@@ -1,6 +1,7 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator, MinLengthValidator
 from django.core.exceptions import ValidationError
+from django.db.models import Q
 
 # Create your models here.
 class Unit(models.Model):
@@ -27,7 +28,8 @@ class Department(models.Model):
 
     # TODO: Define fields here
     name    = models.CharField(max_length=20) 
-    unit    = models.ForeignKey(Unit, on_delete=models.CASCADE, related_name='departements')
+    unit    = models.ForeignKey(Unit, on_delete=models.CASCADE, 
+                                related_name='departements')
     class Meta:
         """Meta definition for Departement."""
 
@@ -43,7 +45,9 @@ class Subdepartment(models.Model):
 
     # TODO: Define fields here
     name        = models.CharField(max_length=64)
-    department = models.ForeignKey(Department, on_delete=models.CASCADE, related_name='subdepartements')
+    department = models.ForeignKey(Department, 
+                                   on_delete=models.CASCADE, 
+                                   related_name='subdepartements')
     class Meta:
         """Meta definition for Subdepartement."""
 
@@ -102,24 +106,34 @@ class Employee(models.Model):
     employee_id         = models.PositiveBigIntegerField(unique=True)
     name                = models.CharField(max_length=100)
     join_date           = models.DateField()
-    employment_status   = models.CharField(max_length=10, choices=EMPLOYMENT_STATUS)
+    employment_status   = models.CharField(max_length=10,
+                                           choices=EMPLOYMENT_STATUS)
     permanent_date      = models.DateField(null=True, blank=True)
 
     place_of_birth      = models.CharField(max_length=64)
     date_of_birth       = models.DateField()
 
-    religion            = models.CharField(max_length=10, choices=RELIGION)
-    sex                 = models.CharField(max_length=6, choices=SEX)
-    marital_status      = models.CharField(max_length=10, choices=MARITAL_STATUS)
+    religion            = models.CharField(max_length=10, 
+                                           choices=RELIGION)
+    sex                 = models.CharField(max_length=6,
+                                           choices=SEX)
+    marital_status      = models.CharField(max_length=10, 
+                                           choices=MARITAL_STATUS)
 
-    national_id_number  = models.CharField(max_length=16, validators=[MinLengthValidator(16)])
-    family_card_number  = models.CharField(max_length=16, validators=[MinLengthValidator(16)])
+    national_id_number  = models.CharField(max_length=16, 
+                                           validators=[MinLengthValidator(16)])
+    family_card_number  = models.CharField(max_length=16, 
+                                           validators=[MinLengthValidator(16)])
     bpjs_employment     = models.CharField(max_length=16)
     bpjs_health         = models.CharField(max_length=16)
 
     tax_id              = models.CharField(max_length=16, null=True, blank=True)
 
-    blood_type          = models.CharField(max_length=3, choices=BLOOD_TYPE)
+    blood_type          = models.CharField(max_length=3, 
+                                           choices=BLOOD_TYPE,
+                                           null=True,
+                                           blank=True,
+                                           help_text="Keep empty if unknown")
 
     phone               = models.CharField(max_length=16)
     private_mail        = models.EmailField(null=True, blank=True)
@@ -128,7 +142,7 @@ class Employee(models.Model):
     is_active           = models.BooleanField(default=True)
     exit_date           = models.DateField(null=True, 
                                            blank=True,
-                                           help_text="Tanggal resmi keluar"
+                                           help_text="The date employee truely exit"
                                            )
     exit_type           = models.CharField(max_length=15,
                                            choices=EXIT_TYPE,
@@ -177,7 +191,9 @@ class EmployeeAddress(models.Model):
         ('current', 'Current Address'),
     ]
     # TODO: Define fields here
-    employee        = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='addresses')
+    employee        = models.ForeignKey(Employee, 
+                                        on_delete=models.CASCADE, 
+                                        related_name='addresses')
     address_type    = models.CharField(max_length=20, choices=ADDRESS_TYPE)
     address         = models.CharField(max_length=120)
     village         = models.CharField(max_length=32)
@@ -212,7 +228,9 @@ class EmployeeFamily(models.Model):
     ]
 
     # TODO: Define fields here
-    employee        = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='families')
+    employee        = models.ForeignKey(Employee, 
+                                        on_delete=models.CASCADE, 
+                                        related_name='families')
     name            = models.CharField(max_length=100)
     sex             = models.CharField(max_length=6, choices=SEX)
     relationship    = models.CharField(max_length=15, choices=FAMILY_RELATION)
@@ -231,10 +249,12 @@ class EmployeeStudied(models.Model):
     """Model definition for Employee_studied."""
 
     # TODO: Define fields here
-    employee            = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='educations')
+    employee            = models.ForeignKey(Employee, on_delete=models.CASCADE, 
+                                            related_name='educations')
     institution_name    = models.CharField(max_length=100)
     graduation_year     = models.PositiveSmallIntegerField(
-                            validators=[MinValueValidator(1900), MaxValueValidator(2100)],
+                            validators=[MinValueValidator(1900), 
+                                        MaxValueValidator(2100)],
                             null=True,
                             blank=True
                         )
@@ -274,8 +294,12 @@ class EmployeeHistory(models.Model):
     """Model definition for Employee_history."""
 
     # TODO: Define fields here
-    employee            = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='history')
-    subdepartment       = models.ForeignKey(Subdepartment, on_delete=models.CASCADE, related_name='employee_histories')
+    employee            = models.ForeignKey(Employee, 
+                                            on_delete=models.CASCADE, 
+                                            related_name='history')
+    subdepartment       = models.ForeignKey(Subdepartment, 
+                                            on_delete=models.CASCADE, 
+                                            related_name='employee_histories')
     position            = models.ForeignKey(Position, on_delete=models.CASCADE)
     grade               = models.CharField(max_length=3, null=True, blank=True)
     start_date          = models.DateField()
@@ -289,6 +313,15 @@ class EmployeeHistory(models.Model):
         verbose_name = 'Employee History'
         verbose_name_plural = 'Employee Histories'
         ordering = ['-start_date']
+
+        #ini bagian prnting
+        constraints = [
+            models.UniqueConstraint(
+                fields=['employee'],
+                condition=Q(is_active=True),
+                name='unique_active_history_per_employee'
+            )
+        ]
 
     def __str__(self):
         """Unicode representation of Employee_history."""

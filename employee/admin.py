@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.http.request import HttpRequest
 from .models import *
 from datetime import date
 
@@ -64,13 +65,64 @@ def exit_as_retired(modeladmin, request, queryset):
             end_date=date.today()
         )
 
+# @admin.register(Employee)
+# class EmployeeAdmin(admin.ModelAdmin):
+#     list_display = ('employee_id', 'name', 'is_active', 'exit_type', 'exit_date')
+#     list_filter  = ('is_active', 'exit_type')
+#     search_fields= ('employee_id', 'name')
+#     action = [
+#         exit_as_resign,
+#         exit_as_terminated,
+#         exit_as_retired,
+#     ]
+
+class EmployeeHistoryInline(admin.TabularInline):
+    model = EmployeeHistory
+    extra = 0
+    can_delete = False
+    ordering = ('-start_date',)
+
+    readonly_fields = (
+        'employee',
+        'start_date',
+        'end_date',
+        'is_active',
+    )
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+
+class EmployeeAddressInline(admin.TabularInline):
+    model = EmployeeAddress
+    extra = 1
+
 @admin.register(Employee)
 class EmployeeAdmin(admin.ModelAdmin):
-    list_display = ('employee_id', 'name', 'is_active', 'exit_type', 'exit_date')
-    list_filter  = ('is_active', 'exit_type')
-    search_fields= ('employee_id', 'name')
+    list_display = (
+        'employee_id',
+        'name',
+        'is_active',
+        'employment_status',
+        'join_date',
+    )
+    list_filter = (
+        'is_active',
+        'employment_status',
+    )
+
+    search_fields = (
+        'employee_id',
+        'name',
+    )
+
     action = [
         exit_as_resign,
         exit_as_terminated,
         exit_as_retired,
+    ]
+
+    inlines = [
+        EmployeeHistoryInline,
+        EmployeeAddressInline,
     ]
