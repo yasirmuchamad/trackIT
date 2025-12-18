@@ -2,6 +2,8 @@ from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator, MinLengthValidator
 from django.core.exceptions import ValidationError
 from django.db.models import Q
+from django.utils import timezone
+
 
 # Create your models here.
 class Unit(models.Model):
@@ -102,6 +104,15 @@ class Employee(models.Model):
         ('retired', 'Retired')  #Pensiun
     ]
 
+    EXIT_REASON = [
+        ('probation_failed', 'Failed Probation'),
+        ('performance', 'Performance Issue'),
+        ('disciplinary', 'Disciplinary Action'),
+        ('company_policy', 'Company Policy'),
+        ('absconding', 'Absconding / AWOL'),
+        ('personal', 'Personal Reason'),
+    ]
+
     # TODO: Define fields here
     employee_id         = models.PositiveBigIntegerField(unique=True)
     name                = models.CharField(max_length=100)
@@ -127,32 +138,37 @@ class Employee(models.Model):
     bpjs_employment     = models.CharField(max_length=16)
     bpjs_health         = models.CharField(max_length=16)
 
-    tax_id              = models.CharField(max_length=16, null=True, blank=True)
+    tax_id              = models.CharField(max_length=16, 
+                            null=True, 
+                            blank=True
+                            )
 
     blood_type          = models.CharField(max_length=3, 
-                                           choices=BLOOD_TYPE,
-                                           null=True,
-                                           blank=True,
-                                           help_text="Keep empty if unknown")
+                            choices=BLOOD_TYPE,
+                            null=True,
+                            blank=True,
+                            help_text="Keep empty if unknown"
+                            )
 
     phone               = models.CharField(max_length=16)
     private_mail        = models.EmailField(null=True, blank=True)
     company_mail        = models.EmailField(null=True, blank=True)
 
     is_active           = models.BooleanField(default=True)
+    last_working_date   = models.DateField(null=True, blank=True)
     exit_date           = models.DateField(null=True, 
-                                           blank=True,
-                                           help_text="The date employee truely exit"
-                                           )
+                            blank=True,
+                            help_text="The date employee truely exit"
+                            )
     exit_type           = models.CharField(max_length=15,
-                                           choices=EXIT_TYPE,
-                                           null=True,
-                                           blank=True
-                                           )
+                            choices=EXIT_TYPE,
+                            null=True,
+                            blank=True
+                            )
     exit_reason         = models.CharField(max_length=100,
-                                           null=True,
-                                           blank=True
-                                           )
+                            null=True,
+                            blank=True
+                            )
     
     class Meta:
         """Meta definition for Employee."""
@@ -165,6 +181,9 @@ class Employee(models.Model):
         return f"{self.employee_id} - {self.name}"
 
     def clean(self):
+        super().clean()
+        today = timezone.now().date()
+
         # employee sudah keluar
         if not self.is_active:
             if not self.exit_date:
@@ -182,6 +201,31 @@ class Employee(models.Model):
                 raise ValidationError(
                     "Employee active can't have exit date."
                 )
+            
+        # Hari terakhir kerja
+        if self.last_working_date:
+            # tidak boleh dimasa depan
+            if self.last_working_date > today:
+                raise ValidationError({
+                    'last_working_date':'Last working date cannot be in the future.'
+                })
+
+            # tidak boleh sebelum tanggal gabung
+            if self.join_date and self.last_working_date < self.join_date:
+                raise ValidationError({
+                    'last_working_date':'Last working date cannot be before join date.'
+                })
+            
+            if not self.exit_date:
+                raise ValidationError({
+                    'last_working_date':'Exit date must be filled if last working date is set.'
+                })
+            
+            if self.exit_date and self.last_working_date > self.exit_date:
+                raise ValidationError({
+                    'last_working_date':'Last working date cannot after exit date.'
+                })
+        
 
 
 class EmployeeAddress(models.Model):
