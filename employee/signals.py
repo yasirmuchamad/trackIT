@@ -19,5 +19,5 @@ def deactivate_previous_history(sender, instance, **kwargs):
 
         for history in previous_histories:
             history.is_active = False
-            history.end_date = instance.start_date or timezone>now().date()
+            history.end_date = instance.start_date or timezone.now().date()
             history.save(update_fields=['is_active', 'end_date'])
