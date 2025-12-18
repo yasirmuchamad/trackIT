@@ -1,7 +1,7 @@
 from django.urls import path
 from .views import *
 
-app_name = 'employee'
+app_name = 'employees'
 urlpatterns = [
     # path('/', CategoryListView.as_view(), name='list_category'),
     # path('category/create', CategoryCreateView.as_view(), name='create_category'),
