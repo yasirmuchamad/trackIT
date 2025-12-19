@@ -34,3 +34,15 @@ class EmployeeHistoryConstrainsTest(TesctCase):
             bpjs_health='456',
             phone='08123456789',
         )
+
+        def test_first_history_can_be_active(self):
+            history = EmployeeHistory.objects.create(
+                employee=self.employee,
+                subdepartment=self.subdepartements,
+                position=self.position,
+                start_date=date(2024, 1, 1),
+                is_active=True,
+            )
+
+            self.assertTrue(history.is_active)
+            self.assertIsNone(history.end_date)
