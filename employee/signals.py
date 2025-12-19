@@ -12,7 +12,7 @@ def deactivate_previous_history(sender, instance, **kwargs):
     # then deactivate previous history active on same employee.
 
     if not instance.pk and instance.is_active:
-        previous_histories = EmployeeHistory.object.filter(
+        previous_histories = EmployeeHistory.objects.filter(
             employee=instance.employee,
             is_active=True
         )

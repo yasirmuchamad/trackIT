@@ -1,10 +1,10 @@
-from django.test import TesctCase
+from django.test import TestCase
 from django.db import IntegrityError
 from datetime import date
 
 from employee.models import *
 
-class EmployeeHistoryConstrainsTest(TesctCase):
+class EmployeeHistoryConstrainstTest(TestCase):
     def setUp(self):
         self.unit = Unit.objects.create(name='office')
         self.department = Department.objects.create(
@@ -13,7 +13,7 @@ class EmployeeHistoryConstrainsTest(TesctCase):
         )
         self.subdepartment = Subdepartment.objects.create(
             name='Infrastructure',
-            departement=self.department
+            department=self.department
         )
         self.position = Position.objects.create(
             name='Staff'
@@ -35,14 +35,59 @@ class EmployeeHistoryConstrainsTest(TesctCase):
             phone='08123456789',
         )
 
-        def test_first_history_can_be_active(self):
-            history = EmployeeHistory.objects.create(
+    def test_first_history_can_be_active(self):
+        history = EmployeeHistory.objects.create(
+            employee=self.employee,
+            subdepartment=self.subdepartment,
+            position=self.position,
+            start_date=date(2024, 1, 1),
+            is_active=True,
+        )
+
+        self.assertTrue(history.is_active)
+        self.assertIsNone(history.end_date)
+
+    def test_new_history_deactivates_previous_one(self):
+        old_history=EmployeeHistory.objects.create(
+            employee = self.employee,
+            subdepartment=self.subdepartment,
+            position=self.position,
+            start_date=date(2024, 1, 1),
+            is_active=True,
+        )
+
+        new_history=EmployeeHistory.objects.create(
+            employee=self.employee,
+            subdepartment=self.subdepartment,
+            position=self.position,
+            start_date=date(2024, 6, 1),
+            is_active=True,
+        )
+
+        old_history.refresh_from_db()
+
+        self.assertFalse(old_history.is_active)
+        self.assertEqual(old_history.end_date, date(2024, 6, 1))
+        self.assertTrue(new_history.is_active)
+
+        def test_database_constrainst_prevents_multiple_active_history(self):
+            EmployeeHistory.objects.create(
                 employee=self.employee,
-                subdepartment=self.subdepartements,
+                subdepartment=self.subdepartment,
                 position=self.position,
-                start_date=date(2024, 1, 1),
+                start_date=date(2024, 6, 1),
                 is_active=True,
             )
 
-            self.assertTrue(history.is_active)
-            self.assertIsNone(history.end_date)
+            with self.assertRaises(IntegrityError):
+                EmployeeHistory.objects.create(
+                    employee=self.employee,
+                    subdepartment=self.subdepartment,
+                    position=self.position,
+                    start_date=date(2024, 2, 1),
+                    is_active=True,
+                )
+
+class SmokeTest(TestCase):
+    def test_it_works(self):
+        self.assertTrue(True)
