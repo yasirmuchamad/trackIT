@@ -3,6 +3,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator, MinLeng
 from django.core.exceptions import ValidationError
 from django.db.models import Q
 from django.utils import timezone
+import uuid
 
 
 # Create your models here.
@@ -276,8 +277,10 @@ class EmployeeFamily(models.Model):
                                         on_delete=models.CASCADE, 
                                         related_name='families')
     name            = models.CharField(max_length=100)
-    sex             = models.CharField(max_length=6, choices=SEX)
-    relationship    = models.CharField(max_length=15, choices=FAMILY_RELATION)
+    sex             = models.CharField(max_length=6, 
+                                       choices=SEX)
+    relationship    = models.CharField(max_length=15, 
+                                       choices=FAMILY_RELATION)
     date_of_birth   = models.DateField()
     class Meta:
         """Meta definition for Employee_family."""
@@ -293,7 +296,8 @@ class EmployeeStudied(models.Model):
     """Model definition for Employee_studied."""
 
     # TODO: Define fields here
-    employee            = models.ForeignKey(Employee, on_delete=models.CASCADE, 
+    employee            = models.ForeignKey(Employee, 
+                                            on_delete=models.CASCADE, 
                                             related_name='educations')
     institution_name    = models.CharField(max_length=100)
     graduation_year     = models.PositiveSmallIntegerField(
@@ -302,8 +306,10 @@ class EmployeeStudied(models.Model):
                             null=True,
                             blank=True
                         )
-    major               = models.CharField(max_length=100, null=True, blank=True)
-    degree              = models.CharField(max_length=8, null=True, blank=True)
+    major               = models.CharField(max_length=100, 
+                                           null=True, blank=True)
+    degree              = models.CharField(max_length=8, 
+                                           null=True, blank=True)
     class Meta:
         """Meta definition for Employee_studied."""
 
@@ -370,3 +376,36 @@ class EmployeeHistory(models.Model):
     def __str__(self):
         """Unicode representation of Employee_history."""
         return f"{self.employee.name} - {self.position.name} - {self.start_date}"
+
+class EmployeeOnboarding(models.Model):
+    employee = models.OneToOneField(
+        'Employee',
+        on_delete=models.CASCADE,
+        related_name = 'onboarding'
+    )
+
+    token=models.UUIDField(
+        default     = uuid.uuid4,
+        unique      = True,
+        editable    = False
+    )
+
+    is_complete     = models.BooleanField(default=False)
+    completed_at    = models.DateTimeField(null=True,
+                                           blank=True
+                                           ) 
+    
+    expires_at  = models.DateTimeField()
+    create_at   = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Employee onboarding'
+        verbose_name_plural = 'Employee Onboardings'
+
+    def is_expired(self):
+        return timezone.now() > self.exxpires_at
+    
+    def __str__(self):
+        return f"(self.employee.name) onboarding"
+
+
