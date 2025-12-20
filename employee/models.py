@@ -390,7 +390,7 @@ class EmployeeOnboarding(models.Model):
         editable    = False
     )
 
-    is_complete     = models.BooleanField(default=False)
+    is_completed    = models.BooleanField(default=False)
     completed_at    = models.DateTimeField(null=True,
                                            blank=True
                                            ) 
