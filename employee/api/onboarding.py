@@ -2,6 +2,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from rest_framework import status
+from employee.api.throttles import Onboardingthrottle
+
 
 from django.core.exceptions import ValidationError
 from employee.services.onboarding import submit_onboarding
@@ -11,6 +13,7 @@ class OnboardingSubmitAPIView(APIView):
     Public onboarding enpoint (no auth)
     """
     permission_classes = [AllowAny]
+    throttle_classes = [Onboardingthrottle]
 
     def post(self, request, token):
         try:

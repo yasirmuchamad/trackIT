@@ -126,3 +126,12 @@ STATICFILES_DIRS = [
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+REST_FRAMEWORK = {
+    "DEFAULT_THROTTLE_CLASSES":[
+        "rest_framework.throttling.AnnonRateThrottle",
+    ],
+    "DEFAULT_THROTTLE_RATES": {
+        "onboarding":"5/min",
+    },
+}
