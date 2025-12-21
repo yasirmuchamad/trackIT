@@ -49,6 +49,21 @@ def submit_onboarding(token, payload):
         "private_mail",
     ]
 
+    required_fields = [
+        "place_of_birth",
+        "date_of_birth",
+        "religion",
+        "sex",
+        "marital_status",
+        "national_id_number",
+        "family_card_number",
+        "phone"
+    ]
+
+    for field in required_fields:
+        if not employee_data.get(field):
+            raise ValidationError(f"{field} is required")
+
     for field in allowed_fields:                # Ulangi satu persatu field yang diijinkan
         if field in employee_data:              # apakah form mengirim field ini?
             setattr(employee, field, employee_data[field])      # setattr(employee, "phone", "0838")

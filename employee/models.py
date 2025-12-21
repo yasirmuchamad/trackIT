@@ -120,24 +120,51 @@ class Employee(models.Model):
     join_date           = models.DateField()
     employment_status   = models.CharField(max_length=10,
                                            choices=EMPLOYMENT_STATUS)
-    permanent_date      = models.DateField(null=True, blank=True)
-
-    place_of_birth      = models.CharField(max_length=64)
-    date_of_birth       = models.DateField()
+    permanent_date      = models.DateField(null=True, 
+                                           blank=True,
+                                           )
+    place_of_birth      = models.CharField(max_length=64,
+                                           null=True,
+                                           blank=True,
+                                           )
+    date_of_birth       = models.DateField(null=True,
+                                           blank=True,
+                                           )
 
     religion            = models.CharField(max_length=10, 
-                                           choices=RELIGION)
+                                           choices=RELIGION,
+                                           null=True,
+                                           blank=True,
+                                           )
     sex                 = models.CharField(max_length=6,
-                                           choices=SEX)
+                                           choices=SEX,
+                                           null=True,
+                                           blank=True,
+                                           )
     marital_status      = models.CharField(max_length=10, 
-                                           choices=MARITAL_STATUS)
+                                           choices=MARITAL_STATUS,
+                                           null=True,
+                                           blank=True,
+                                           )
 
-    national_id_number  = models.CharField(max_length=16, 
-                                           validators=[MinLengthValidator(16)])
-    family_card_number  = models.CharField(max_length=16, 
-                                           validators=[MinLengthValidator(16)])
-    bpjs_employment     = models.CharField(max_length=16)
-    bpjs_health         = models.CharField(max_length=16)
+    national_id_number  = models.CharField(max_length=16,
+                                           null=True,
+                                           blank=True, 
+                                           validators=[MinLengthValidator(16)]
+                                           )
+    family_card_number  = models.CharField(max_length=16,
+                                           null=True,
+                                           blank=True,
+                                           validators=[MinLengthValidator(16)]
+                                           )
+    bpjs_employment     = models.CharField(max_length=16,
+                                           null=True,
+                                           blank=True,
+                                           )
+    bpjs_health         = models.CharField(max_length=16,
+                                           null=True,
+                                           blank=True,
+                                           )
 
     tax_id              = models.CharField(max_length=16, 
                             null=True, 
@@ -151,7 +178,10 @@ class Employee(models.Model):
                             help_text="Keep empty if unknown"
                             )
 
-    phone               = models.CharField(max_length=16)
+    phone               = models.CharField(max_length=16,
+                                           null=True,
+                                           blank=True
+                                           )
     private_mail        = models.EmailField(null=True, blank=True)
     company_mail        = models.EmailField(null=True, blank=True)
 
@@ -403,7 +433,7 @@ class EmployeeOnboarding(models.Model):
         verbose_name_plural = 'Employee Onboardings'
 
     def is_expired(self):
-        return timezone.now() > self.exxpires_at
+        return timezone.now() > self.expires_at
     
     def __str__(self):
         return f"(self.employee.name) onboarding"
