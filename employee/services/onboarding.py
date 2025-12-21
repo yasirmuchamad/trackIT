@@ -1,7 +1,10 @@
 from django.db import transaction
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 from employee.models import *
+import json
 
 
 @transaction.atomic
@@ -107,3 +110,20 @@ def submit_onboarding(token, payload):
     onboarding.save()
 
     return employee
+
+@csrf_exempt
+def onboarding_submit(request, token):
+    if request.method != "POST":
+        return JsonResponse({"error":"Method not alowwed"}, status=405)
+    
+    try:
+        payload = json.loads(request.body)
+        employee = submit_onboarding(token, payload)
+    except ValidationError as e:
+        return JsonResponse({"error":str(e)}, status=400)
+    
+    return JsonResponse({
+        "status":"success",
+        "employee_id":employee.employee_id
+    })
+    

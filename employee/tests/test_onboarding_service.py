@@ -56,7 +56,11 @@ class SubmitOnboardingTest(TestCase):
 
     
     def test_expired_token_rejected(self):
+        # atur token menjadi expired
         self.onboarding.expires_at = timezone.now() - timedelta(days=1)
+        # timezone.now() -> waktu sekarang
+        # - timedelda(days=1) -> dikurangi 1 hari yang lalu
+        #  jadi token sudah kadaluarsa 
         self.onboarding.save()
 
         with self.assertRaises(ValidationError):
