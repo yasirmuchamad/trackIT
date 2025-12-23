@@ -33,21 +33,29 @@ class OnboardingSubmitAPITest(APITestCase):
             args=[self.onboarding.token]
         )
 
-        def test_onboarding_submit_success(self):
-            payload = {
-                "employee":{
-                    "place_of_birth":"Jakarta",
-                    "date_of_birth":"1993-01-01",
-                    "phone":"0876523487682"
-                }
+    def test_onboarding_submit_success(self):
+        payload = {
+            "employee":{
+                "place_of_birth":"Jakarta",
+                "date_of_birth":"1993-01-01",
+                "phone":"0876523487682"
             }
+        }
 
-            response = self.client.post(self.url, payload, format="json")
-            
-            self.assertEqual(response.status_code, 200)
+        response = self.client.post(self.url, payload, format="json")
+        
+        self.assertEqual(response.status_code, 200)
 
-            self.employee.refresh_from_db()
-            self.onboarding.refresh_from_db()
+        self.employee.refresh_from_db()
+        self.onboarding.refresh_from_db()
 
-            self.assertEqual(self.employee.place_of_birth, "Jakarta")
-            self.assertTrue(self.onboarding.is_completed)
+        self.assertEqual(self.employee.place_of_birth, "Jakarta")
+        self.assertTrue(self.onboarding.is_completed)
+
+    def test_onboarding_cannot_be_submitted_twice(self):
+        self.onboarding.is_completed = True
+        self.onboarding.save()
+
+        response = self.client.post(self.url, {}, format="json")
+
+        self.assertEqual(response.status_code, 400)

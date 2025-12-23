@@ -1,4 +1,4 @@
-from rest_framework.throttling import AnnonRateThrottle
+from rest_framework.throttling import AnonRateThrottle
 
-class Onboardingthrottle(AnnonRateThrottle):
+class Onboardingthrottle(AnonRateThrottle):
     scope = "onboarding"

@@ -4,6 +4,7 @@ from django.core.exceptions import ValidationError
 from django.db.models import Q
 from django.utils import timezone
 import uuid
+from datetime import timedelta
 
 
 # Create your models here.
@@ -435,7 +436,34 @@ class EmployeeOnboarding(models.Model):
     def is_expired(self):
         return timezone.now() > self.expires_at
     
+    @classmethod
+    def create_for_employee(cls, employee, days_valid=3):
+        return cls.objects.create(
+            employee=employee,
+            expires_at=timezone.now() + timedelta(days_valid)
+        )
+    
     def __str__(self):
         return f"(self.employee.name) onboarding"
 
 
+class OnboardingDelivery(models.Model):
+    CHANNEL_CHOICES = [
+        ("email", "Email"),
+        ("whatsapp", "WhatsApp"),
+    ]
+
+    onboarding = models.ForeignKey(EmployeeOnboarding,
+                                   on_delete=models.CASCADE,
+                                   related_name="deliveries"
+                                   )
+    channel = models.CharField(max_length=10,
+                               choices=CHANNEL_CHOICES
+                               )
+    destination = models.Charfield(max_length=255)
+    sent_at = models.DateTimeField(auto_now_add=True)
+    is_succces = models.BooleanField(default=True)
+    error_message = models.TextField(blank=True)
+    
+    def __str__(self):
+        return f"{self.channel} -> {self.destination} "
