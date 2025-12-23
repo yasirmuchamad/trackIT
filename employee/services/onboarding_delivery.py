@@ -55,9 +55,9 @@ def send_onboarding_whatsapp(onboarding, phone):
             error_message=str(e),
         )
 
-    def send_onboarding_link(onboarding, email=None, phone=None):
-        if email:
-            send_onboarding_email(onboarding, email)
+def send_onboarding_links(onboarding, email=None, phone=None):
+    if email:
+        send_onboarding_email(onboarding, email)
 
-        if phone:
-            send_onboarding_whatsapp(onboarding, phone)
+    if phone:
+        send_onboarding_whatsapp(onboarding, phone)
