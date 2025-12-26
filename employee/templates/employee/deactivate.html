@@ -1,0 +1,120 @@
+{% extends "employee/base.html" %}
+
+{% block employee_content %}
+<div class="row">
+    <div class="col-12">
+        <h2>Deactivate Employee: {{ employee.name }}</h2>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'employees:dashboard' %}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'employees:employee_list' %}">Employee List</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'employees:employee_detail' employee.employee_id %}">{{ employee.name }}</a></li>
+                <li class="breadcrumb-item active">Deactivate</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-warning">
+                <h5 class="mb-0">
+                    <i class="fas fa-exclamation-triangle"></i> Deactivate Employee
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <strong>Warning:</strong> This action will deactivate the employee and end their current position. 
+                    This action cannot be easily undone.
+                </div>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="exit_type" class="form-label">Exit Type *</label>
+                            <select name="exit_type" id="exit_type" class="form-control" required>
+                                <option value="">Select exit type...</option>
+                                {% for value, label in exit_types %}
+                                <option value="{{ value }}">{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="exit_reason" class="form-label">Exit Reason</label>
+                            <select name="exit_reason" id="exit_reason" class="form-control">
+                                <option value="">Select reason (optional)...</option>
+                                {% for value, label in exit_reasons %}
+                                <option value="{{ value }}">{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="last_working_date" class="form-label">Last Working Date</label>
+                            <input type="date" name="last_working_date" id="last_working_date" class="form-control">
+                            <small class="text-muted">The actual last day the employee worked</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="exit_date" class="form-label">Exit Date *</label>
+                            <input type="date" name="exit_date" id="exit_date" class="form-control" required>
+                            <small class="text-muted">Official exit date from the company</small>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'employees:employee_detail' employee.employee_id %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Cancel
+                        </a>
+                        <button type="submit" class="btn btn-warning" 
+                                onclick="return confirm('Are you sure you want to deactivate {{ employee.name }}? This action will end their employment.')">
+                            <i class="fas fa-user-times"></i> Deactivate Employee
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h6>Employee Information</h6>
+            </div>
+            <div class="card-body">
+                <p><strong>Name:</strong> {{ employee.name }}</p>
+                <p><strong>Employee ID:</strong> {{ employee.employee_id }}</p>
+                <p><strong>Join Date:</strong> {{ employee.join_date }}</p>
+                <p><strong>Employment Status:</strong> {{ employee.employment_status|title }}</p>
+                
+                {% with current_history=employee.history.first %}
+                    {% if current_history %}
+                    <hr>
+                    <p><strong>Current Position:</strong><br>{{ current_history.position.name }}</p>
+                    <p><strong>Department:</strong><br>{{ current_history.subdepartment.name }}</p>
+                    <p><strong>Start Date:</strong><br>{{ current_history.start_date }}</p>
+                    {% endif %}
+                {% endwith %}
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                <h6>What happens when deactivated?</h6>
+            </div>
+            <div class="card-body">
+                <ul class="text-muted small">
+                    <li>Employee status will be set to inactive</li>
+                    <li>Current position will be ended</li>
+                    <li>Employee will no longer appear in active employee lists</li>
+                    <li>All historical data will be preserved</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,106 @@
+{% extends "employee/base.html" %}
+
+{% block employee_content %}
+<div class="row">
+    <div class="col-12">
+        <h2>Employee Dashboard</h2>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item active">Dashboard</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <h5 class="card-title">Total Employees</h5>
+                <h2>{{ total_employees }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <h5 class="card-title">Active Employees</h5>
+                <h2>{{ active_employees }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <h5 class="card-title">Inactive Employees</h5>
+                <h2>{{ inactive_employees }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <h5 class="card-title">New (30 days)</h5>
+                <h2>{{ recent_employees }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>Employees by Unit</h5>
+            </div>
+            <div class="card-body">
+                {% for unit_stat in units_stats %}
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span>{{ unit_stat.unit.name|title }}</span>
+                    <span class="badge bg-primary">{{ unit_stat.count }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>Employment Status</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span>Permanent</span>
+                    <span class="badge bg-success">{{ permanent_count }}</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span>Probation</span>
+                    <span class="badge bg-warning">{{ probation_count }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5>Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <a href="{% url 'employees:create_employee' %}" class="btn btn-primary me-2">
+                    <i class="fas fa-plus"></i> Add New Employee
+                </a>
+                <a href="{% url 'employees:employee_list' %}" class="btn btn-outline-primary me-2">
+                    <i class="fas fa-list"></i> View All Employees
+                </a>
+                <a href="{% url 'employees:onboarding_list' %}" class="btn btn-outline-info">
+                    <i class="fas fa-user-check"></i> Onboarding Status
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

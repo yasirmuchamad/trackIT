@@ -1,0 +1,136 @@
+{% extends "employee/base.html" %}
+
+{% block employee_content %}
+<div class="row">
+    <div class="col-12">
+        <h2>Employee Onboarding Status</h2>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'employees:dashboard' %}">Dashboard</a></li>
+                <li class="breadcrumb-item active">Onboarding Status</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<!-- Filter Form -->
+<div class="search-form">
+    <form method="get" class="row g-3">
+        <div class="col-md-4">
+            <select name="status" class="form-control">
+                <option value="">All Status</option>
+                <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Completed</option>
+                <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
+                <option value="expired" {% if status_filter == 'expired' %}selected{% endif %}>Expired</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary w-100">
+                <i class="fas fa-filter"></i> Filter
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- Onboarding List -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Employee</th>
+                                <th>Employee ID</th>
+                                <th>Created</th>
+                                <th>Expires</th>
+                                <th>Status</th>
+                                <th>Completed</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for onboarding in page_obj %}
+                            <tr>
+                                <td>
+                                    <a href="{% url 'employees:employee_detail' onboarding.employee.employee_id %}">
+                                        {{ onboarding.employee.name }}
+                                    </a>
+                                </td>
+                                <td>{{ onboarding.employee.employee_id }}</td>
+                                <td>{{ onboarding.create_at|date:"M d, Y H:i" }}</td>
+                                <td>{{ onboarding.expires_at|date:"M d, Y H:i" }}</td>
+                                <td>
+                                    {% if onboarding.is_completed %}
+                                        <span class="badge bg-success">Completed</span>
+                                    {% elif onboarding.is_expired %}
+                                        <span class="badge bg-danger">Expired</span>
+                                    {% else %}
+                                        <span class="badge bg-warning">Pending</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if onboarding.completed_at %}
+                                        {{ onboarding.completed_at|date:"M d, Y H:i" }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if not onboarding.is_completed %}
+                                    <form method="post" action="{% url 'employees:resend_onboarding' onboarding.id %}" class="d-inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-outline-primary" 
+                                                onclick="return confirm('Resend onboarding link to {{ onboarding.employee.name }}?')">
+                                            <i class="fas fa-paper-plane"></i> Resend
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center py-4">
+                                    <i class="fas fa-inbox fa-2x text-muted mb-2"></i>
+                                    <p class="text-muted">No onboarding records found.</p>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Pagination -->
+{% if page_obj.has_other_pages %}
+<nav aria-label="Onboarding pagination">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page=1{% if status_filter %}&status={{ status_filter }}{% endif %}">First</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}">Previous</a>
+            </li>
+        {% endif %}
+        
+        <li class="page-item active">
+            <span class="page-link">{{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+        </li>
+        
+        {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}">Next</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if status_filter %}&status={{ status_filter }}{% endif %}">Last</a>
+            </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}

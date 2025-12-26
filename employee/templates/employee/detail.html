@@ -1,0 +1,317 @@
+{% extends "employee/base.html" %}
+
+{% block employee_content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2>{{ employee.name }}</h2>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{% url 'employees:dashboard' %}">Dashboard</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'employees:employee_list' %}">Employee List</a></li>
+                        <li class="breadcrumb-item active">{{ employee.name }}</li>
+                    </ol>
+                </nav>
+            </div>
+            <div>
+                <span class="employee-status {% if employee.is_active %}status-active{% else %}status-inactive{% endif %}">
+                    {% if employee.is_active %}Active{% else %}Inactive{% endif %}
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Basic Information -->
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5>Basic Information</h5>
+                <a href="{% url 'employees:update_employee' employee.employee_id %}" class="btn btn-sm btn-outline-primary">
+                    <i class="fas fa-edit"></i> Edit
+                </a>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <table class="table table-borderless">
+                            <tr>
+                                <td><strong>Employee ID:</strong></td>
+                                <td>{{ employee.employee_id }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Join Date:</strong></td>
+                                <td>{{ employee.join_date }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Employment Status:</strong></td>
+                                <td>{{ employee.employment_status|title }}</td>
+                            </tr>
+                            {% if employee.permanent_date %}
+                            <tr>
+                                <td><strong>Permanent Date:</strong></td>
+                                <td>{{ employee.permanent_date }}</td>
+                            </tr>
+                            {% endif %}
+                            <tr>
+                                <td><strong>Place of Birth:</strong></td>
+                                <td>{{ employee.place_of_birth|default:"-" }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Date of Birth:</strong></td>
+                                <td>{{ employee.date_of_birth|default:"-" }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <table class="table table-borderless">
+                            <tr>
+                                <td><strong>Gender:</strong></td>
+                                <td>{{ employee.get_sex_display|default:"-" }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Religion:</strong></td>
+                                <td>{{ employee.get_religion_display|default:"-" }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Marital Status:</strong></td>
+                                <td>{{ employee.get_marital_status_display|default:"-" }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Blood Type:</strong></td>
+                                <td>{{ employee.get_blood_type_display|default:"-" }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Phone:</strong></td>
+                                <td>{{ employee.phone|default:"-" }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Personal Email:</strong></td>
+                                <td>{{ employee.private_mail|default:"-" }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Current Position -->
+        {% if current_history %}
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5>Current Position</h5>
+                <a href="{% url 'employees:employee_history_create' employee.employee_id %}" class="btn btn-sm btn-outline-primary">
+                    <i class="fas fa-plus"></i> Add Position
+                </a>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Position:</strong> {{ current_history.position.name }}</p>
+                        <p><strong>Department:</strong> {{ current_history.subdepartment.department.name }}</p>
+                        <p><strong>Subdepartment:</strong> {{ current_history.subdepartment.name }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Unit:</strong> {{ current_history.subdepartment.department.unit.name|title }}</p>
+                        <p><strong>Grade:</strong> {{ current_history.grade|default:"-" }}</p>
+                        <p><strong>Start Date:</strong> {{ current_history.start_date }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Position History -->
+        {% if history %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>Position History</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Position</th>
+                                <th>Department</th>
+                                <th>Start Date</th>
+                                <th>End Date</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for hist in history %}
+                            <tr>
+                                <td>{{ hist.position.name }}</td>
+                                <td>{{ hist.subdepartment.name }}</td>
+                                <td>{{ hist.start_date }}</td>
+                                <td>{{ hist.end_date|default:"-" }}</td>
+                                <td>
+                                    {% if hist.is_active %}
+                                        <span class="badge bg-success">Current</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Past</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-md-4">
+        <!-- Actions -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6>Actions</h6>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'employees:update_employee' employee.employee_id %}" class="btn btn-outline-primary">
+                        <i class="fas fa-edit"></i> Edit Employee
+                    </a>
+                    {% if employee.is_active %}
+                    <a href="{% url 'employees:deactivate_employee' employee.employee_id %}" class="btn btn-outline-warning">
+                        <i class="fas fa-user-times"></i> Deactivate
+                    </a>
+                    {% endif %}
+                    {% if current_history %}
+                    <a href="{% url 'employees:employee_history_create' employee.employee_id %}" class="btn btn-outline-info">
+                        <i class="fas fa-briefcase"></i> Change Position
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact Information -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6>Contact Information</h6>
+            </div>
+            <div class="card-body">
+                <p><strong>Company Email:</strong><br>{{ employee.company_mail|default:"-" }}</p>
+                <p><strong>Personal Email:</strong><br>{{ employee.private_mail|default:"-" }}</p>
+                <p><strong>Phone:</strong><br>{{ employee.phone|default:"-" }}</p>
+            </div>
+        </div>
+
+        <!-- Documents -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6>Documents</h6>
+            </div>
+            <div class="card-body">
+                <p><strong>National ID:</strong><br>{{ employee.national_id_number|default:"-" }}</p>
+                <p><strong>Family Card:</strong><br>{{ employee.family_card_number|default:"-" }}</p>
+                <p><strong>BPJS Employment:</strong><br>{{ employee.bpjs_employment|default:"-" }}</p>
+                <p><strong>BPJS Health:</strong><br>{{ employee.bpjs_health|default:"-" }}</p>
+                <p><strong>Tax ID:</strong><br>{{ employee.tax_id|default:"-" }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Additional Information Tabs -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <ul class="nav nav-tabs card-header-tabs" id="employeeTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="addresses-tab" data-bs-toggle="tab" data-bs-target="#addresses" type="button" role="tab">
+                            Addresses
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="family-tab" data-bs-toggle="tab" data-bs-target="#family" type="button" role="tab">
+                            Family
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="education-tab" data-bs-toggle="tab" data-bs-target="#education" type="button" role="tab">
+                            Education
+                        </button>
+                    </li>
+                </ul>
+            </div>
+            <div class="card-body">
+                <div class="tab-content" id="employeeTabContent">
+                    <!-- Addresses Tab -->
+                    <div class="tab-pane fade show active" id="addresses" role="tabpanel">
+                        {% if addresses %}
+                            {% for address in addresses %}
+                            <div class="border-bottom pb-3 mb-3">
+                                <h6>{{ address.get_address_type_display }}</h6>
+                                <p class="mb-1">{{ address.address }}</p>
+                                <p class="text-muted mb-0">
+                                    {{ address.village }}, {{ address.district }}, {{ address.city }}, {{ address.province }}
+                                </p>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <p class="text-muted">No address information available.</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Family Tab -->
+                    <div class="tab-pane fade" id="family" role="tabpanel">
+                        {% if families %}
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Relationship</th>
+                                            <th>Gender</th>
+                                            <th>Date of Birth</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for family in families %}
+                                        <tr>
+                                            <td>{{ family.name }}</td>
+                                            <td>{{ family.get_relationship_display }}</td>
+                                            <td>{{ family.get_sex_display }}</td>
+                                            <td>{{ family.date_of_birth }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <p class="text-muted">No family information available.</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Education Tab -->
+                    <div class="tab-pane fade" id="education" role="tabpanel">
+                        {% if educations %}
+                            {% for education in educations %}
+                            <div class="border-bottom pb-3 mb-3">
+                                <h6>{{ education.institution_name }}</h6>
+                                <p class="mb-1">
+                                    {% if education.degree %}{{ education.degree }} in {% endif %}{{ education.major|default:"General Studies" }}
+                                </p>
+                                <p class="text-muted mb-0">
+                                    {% if education.graduation_year %}Graduated: {{ education.graduation_year }}{% endif %}
+                                </p>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <p class="text-muted">No education information available.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
