@@ -10,7 +10,9 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import os
 from pathlib import Path
+from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -133,5 +135,75 @@ REST_FRAMEWORK = {
     ],
     "DEFAULT_THROTTLE_RATES": {
         "onboarding":"5/min",
+    },
+}
+
+# =============================================================================
+# EMAIL CONFIGURATION
+# =============================================================================
+
+# Email backend configuration
+EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
+
+# SMTP Configuration (only used if EMAIL_BACKEND is SMTP)
+EMAIL_HOST = config('EMAIL_HOST', default='smtphz.qiye.163.com')
+EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
+EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
+EMAIL_USE_SSL = config('EMAIL_USE_SSL', default=False, cast=bool)
+EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
+DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default=EMAIL_HOST_USER)
+
+# =============================================================================
+# ONBOARDING CONFIGURATION
+# =============================================================================
+
+# Frontend URL for onboarding links
+FRONT_END_BASE_URL = config('FRONT_END_BASE_URL', default='http://localhost:8000')
+
+# WhatsApp Configuration
+WHATSAPP_SERVICE_URL = config('WHATSAPP_SERVICE_URL', default='')
+WHATSAPP_SERVICE_TOKEN = config('WHATSAPP_SERVICE_TOKEN', default='')
+
+# WhatsApp Business API (alternative)
+WHATSAPP_API_URL = config('WHATSAPP_API_URL', default='')
+WHATSAPP_API_TOKEN = config('WHATSAPP_API_TOKEN', default='')
+
+# =============================================================================
+# LOGGING CONFIGURATION
+# =============================================================================
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR / 'logs' / 'onboarding.log',
+            'formatter': 'verbose',
+        },
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+    },
+    'loggers': {
+        'employee.services.onboarding_delivery': {
+            'handlers': ['file', 'console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
     },
 }

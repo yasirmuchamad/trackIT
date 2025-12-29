@@ -60,7 +60,7 @@ class Subdepartment(models.Model):
 
     def __str__(self):
         """Unicode representation of Subdepartement."""
-        return f"{self.name} - {self.departement.name}"
+        return f"{self.name} - {self.department.name}"
     
 class Employee(models.Model):
     """Model definition for Employee."""
@@ -460,9 +460,9 @@ class OnboardingDelivery(models.Model):
     channel = models.CharField(max_length=10,
                                choices=CHANNEL_CHOICES
                                )
-    destination = models.Charfield(max_length=255)
+    destination = models.CharField(max_length=255)
     sent_at = models.DateTimeField(auto_now_add=True)
-    is_succces = models.BooleanField(default=True)
+    is_success = models.BooleanField(default=True)
     error_message = models.TextField(blank=True)
     
     def __str__(self):

@@ -69,6 +69,10 @@
                     <small class="text-muted">
                         {{ current_history.position.name }} - {{ current_history.subdepartment.name }}
                     </small>
+                {% else %}
+                    <small class="text-muted text-warning">
+                        <i class="fas fa-exclamation-triangle"></i> No position assigned
+                    </small>
                 {% endif %}
             {% endwith %}
             

@@ -108,19 +108,52 @@ def create_employee(request):
                 onboarding = EmployeeOnboarding.create_for_employee(employee)
                 
                 try:
-                    send_onboarding_links(
+                    results = send_onboarding_links(
                         onboarding,
                         email=employee.private_mail,
                         phone=employee.phone,
                     )
-                    messages.success(
-                        request,
-                        f"Employee {employee.name} created and onboarding link sent."
-                    )
+                    
+                    # Check results and show appropriate messages
+                    success_messages = []
+                    error_messages = []
+                    
+                    if employee.private_mail:
+                        if results['email']:
+                            success_messages.append(f"onboarding email sent to {employee.private_mail}")
+                        else:
+                            error_messages.append(f"failed to send email to {employee.private_mail}")
+                    
+                    if employee.phone:
+                        if results['whatsapp']:
+                            success_messages.append(f"onboarding WhatsApp sent to {employee.phone}")
+                        else:
+                            error_messages.append(f"failed to send WhatsApp to {employee.phone}")
+                    
+                    if success_messages:
+                        messages.success(
+                            request,
+                            f"Employee {employee.name} created successfully. " + 
+                            " and ".join(success_messages).capitalize() + "."
+                        )
+                    
+                    if error_messages:
+                        messages.warning(
+                            request,
+                            "Employee created but some notifications failed: " + 
+                            ", ".join(error_messages) + "."
+                        )
+                    
+                    if not success_messages and not error_messages:
+                        messages.success(
+                            request,
+                            f"Employee {employee.name} created successfully."
+                        )
+                        
                 except Exception as e:
                     messages.warning(
                         request,
-                        f"Employee {employee.name} created but failed to send onboarding link: {str(e)}"
+                        f"Employee {employee.name} created but failed to send onboarding notifications: {str(e)}"
                     )
             else:
                 messages.success(
@@ -217,7 +250,7 @@ def employee_history_create(request, employee_id):
         grade = request.POST.get('grade')
         start_date = request.POST.get('start_date')
         
-        # Deactivate current history
+        # Deactivate current history (if exists)
         current_history = employee.history.filter(is_active=True).first()
         if current_history:
             current_history.is_active = False
@@ -234,14 +267,17 @@ def employee_history_create(request, employee_id):
             is_active=True
         )
         
-        messages.success(request, f"New position history added for {employee.name}")
+        action_message = "Position changed" if current_history else "First position assigned"
+        messages.success(request, f"{action_message} for {employee.name}")
         return redirect("employees:employee_detail", employee_id=employee.employee_id)
     
     # Get all units with their departments and subdepartments
     units = Unit.objects.all()
+    current_history = employee.history.filter(is_active=True).first()
     
     context = {
         'employee': employee,
+        'current_history': current_history,
         'subdepartments': Subdepartment.objects.select_related('department__unit').all(),
         'positions': Position.objects.all(),
         'units': units
@@ -287,11 +323,18 @@ def employee_dashboard(request):
         is_active=True
     ).count()
     
+    # Employees without position
+    employees_without_position = Employee.objects.filter(
+        is_active=True,
+        history__isnull=True
+    ).count()
+    
     context = {
         'total_employees': total_employees,
         'active_employees': active_employees,
         'inactive_employees': inactive_employees,
         'recent_employees': recent_employees,
+        'employees_without_position': employees_without_position,
         'units_stats': units_stats,
         'probation_count': probation_count,
         'permanent_count': permanent_count,
@@ -358,13 +401,286 @@ def resend_onboarding(request, onboarding_id):
     
     if request.method == "POST":
         try:
-            send_onboarding_links(
+            results = send_onboarding_links(
                 onboarding,
                 email=onboarding.employee.private_mail,
                 phone=onboarding.employee.phone,
             )
-            messages.success(request, f"Onboarding link resent to {onboarding.employee.name}")
+            
+            # Check results and show appropriate messages
+            success_messages = []
+            error_messages = []
+            
+            if onboarding.employee.private_mail:
+                if results['email']:
+                    success_messages.append(f"email sent to {onboarding.employee.private_mail}")
+                else:
+                    error_messages.append(f"failed to send email to {onboarding.employee.private_mail}")
+            
+            if onboarding.employee.phone:
+                if results['whatsapp']:
+                    success_messages.append(f"WhatsApp sent to {onboarding.employee.phone}")
+                else:
+                    error_messages.append(f"failed to send WhatsApp to {onboarding.employee.phone}")
+            
+            if success_messages:
+                messages.success(
+                    request, 
+                    f"Onboarding notifications resent to {onboarding.employee.name}: " + 
+                    ", ".join(success_messages) + "."
+                )
+            
+            if error_messages:
+                messages.error(
+                    request, 
+                    f"Failed to resend some notifications to {onboarding.employee.name}: " + 
+                    ", ".join(error_messages) + "."
+                )
+            
+            if not success_messages and not error_messages:
+                messages.warning(
+                    request, 
+                    f"No contact information available for {onboarding.employee.name}."
+                )
+                
         except Exception as e:
-            messages.error(request, f"Failed to resend onboarding link: {str(e)}")
+            messages.error(request, f"Failed to resend onboarding notifications: {str(e)}")
     
     return redirect("employees:onboarding_list")
+
+
+# Onboarding Form Views (Public - No login required)
+def onboarding_form(request, token):
+    """Public onboarding form for employees to complete their data"""
+    try:
+        onboarding = get_object_or_404(EmployeeOnboarding, token=token)
+        
+        # Check if onboarding is expired
+        if onboarding.is_expired():
+            return render(request, 'employee/onboarding_expired.html', {
+                'onboarding': onboarding
+            })
+        
+        # Check if already completed
+        if onboarding.is_completed:
+            return render(request, 'employee/onboarding_completed.html', {
+                'onboarding': onboarding
+            })
+        
+        employee = onboarding.employee
+        
+        if request.method == 'POST':
+            # Process form submission
+            return process_onboarding_form(request, onboarding)
+        
+        # Show onboarding form
+        context = {
+            'onboarding': onboarding,
+            'employee': employee,
+        }
+        
+        return render(request, 'employee/onboarding_form.html', context)
+        
+    except Exception as e:
+        return render(request, 'employee/onboarding_error.html', {
+            'error': str(e)
+        })
+
+
+def process_onboarding_form(request, onboarding):
+    """Process onboarding form submission"""
+    from django.utils import timezone
+    from datetime import datetime
+    
+    employee = onboarding.employee
+    
+    try:
+        # Update employee basic data
+        employee.place_of_birth = request.POST.get('place_of_birth', employee.place_of_birth)
+        employee.date_of_birth = request.POST.get('date_of_birth') or employee.date_of_birth
+        employee.religion = request.POST.get('religion', employee.religion)
+        employee.sex = request.POST.get('sex', employee.sex)
+        employee.marital_status = request.POST.get('marital_status', employee.marital_status)
+        employee.national_id_number = request.POST.get('national_id_number', employee.national_id_number)
+        employee.family_card_number = request.POST.get('family_card_number', employee.family_card_number)
+        employee.blood_type = request.POST.get('blood_type', employee.blood_type)
+        employee.phone = request.POST.get('phone', employee.phone)
+        
+        # Update BPJS and Tax information
+        employee.bpjs_employment = request.POST.get('bpjs_employment', employee.bpjs_employment)
+        employee.bpjs_health = request.POST.get('bpjs_health', employee.bpjs_health)
+        employee.tax_id = request.POST.get('tax_id', employee.tax_id)
+        
+        # Validate required fields
+        errors = []
+        if not employee.place_of_birth:
+            errors.append("Place of birth is required")
+        if not employee.date_of_birth:
+            errors.append("Date of birth is required")
+        if not employee.sex:
+            errors.append("Gender is required")
+        if not employee.phone:
+            errors.append("Phone number is required")
+        
+        if errors:
+            context = {
+                'onboarding': onboarding,
+                'employee': employee,
+                'errors': errors,
+            }
+            return render(request, 'employee/onboarding_form.html', context)
+        
+        # Save employee data
+        employee.save()
+        
+        # Process Address Information
+        process_address_data(request, employee)
+        
+        # Process Family Information
+        process_family_data(request, employee)
+        
+        # Process Education Information
+        process_education_data(request, employee)
+        
+        # Mark onboarding as completed
+        onboarding.is_completed = True
+        onboarding.completed_at = timezone.now()
+        onboarding.save()
+        
+        return render(request, 'employee/onboarding_success.html', {
+            'onboarding': onboarding,
+            'employee': employee
+        })
+        
+    except Exception as e:
+        context = {
+            'onboarding': onboarding,
+            'employee': employee,
+            'errors': [f"Error saving data: {str(e)}"],
+        }
+        return render(request, 'employee/onboarding_form.html', context)
+
+
+def process_address_data(request, employee):
+    """Process address information from onboarding form"""
+    from employee.models import EmployeeAddress
+    
+    # Current Address
+    current_address = request.POST.get('current_address')
+    current_village = request.POST.get('current_village')
+    current_district = request.POST.get('current_district')
+    current_city = request.POST.get('current_city')
+    current_province = request.POST.get('current_province')
+    
+    if current_address and current_village and current_district and current_city and current_province:
+        # Delete existing current address
+        EmployeeAddress.objects.filter(employee=employee, address_type='current').delete()
+        
+        # Create new current address
+        EmployeeAddress.objects.create(
+            employee=employee,
+            address_type='current',
+            address=current_address,
+            village=current_village,
+            district=current_district,
+            city=current_city,
+            province=current_province
+        )
+    
+    # Registered Address (if different)
+    same_address = request.POST.get('same_address') == 'on'
+    
+    if not same_address:
+        registered_address = request.POST.get('registered_address')
+        registered_village = request.POST.get('registered_village')
+        registered_district = request.POST.get('registered_district')
+        registered_city = request.POST.get('registered_city')
+        registered_province = request.POST.get('registered_province')
+        
+        if registered_address and registered_village and registered_district and registered_city and registered_province:
+            # Delete existing registered address
+            EmployeeAddress.objects.filter(employee=employee, address_type='registered').delete()
+            
+            # Create new registered address
+            EmployeeAddress.objects.create(
+                employee=employee,
+                address_type='registered',
+                address=registered_address,
+                village=registered_village,
+                district=registered_district,
+                city=registered_city,
+                province=registered_province
+            )
+    else:
+        # Copy current address to registered address
+        if current_address:
+            EmployeeAddress.objects.filter(employee=employee, address_type='registered').delete()
+            EmployeeAddress.objects.create(
+                employee=employee,
+                address_type='registered',
+                address=current_address,
+                village=current_village,
+                district=current_district,
+                city=current_city,
+                province=current_province
+            )
+
+
+def process_family_data(request, employee):
+    """Process family information from onboarding form"""
+    from employee.models import EmployeeFamily
+    from datetime import datetime
+    
+    # Delete existing family data
+    EmployeeFamily.objects.filter(employee=employee).delete()
+    
+    # Process multiple family members
+    family_count = int(request.POST.get('family_count', 0))
+    
+    for i in range(family_count):
+        name = request.POST.get(f'family_name_{i}')
+        sex = request.POST.get(f'family_sex_{i}')
+        relationship = request.POST.get(f'family_relationship_{i}')
+        date_of_birth = request.POST.get(f'family_dob_{i}')
+        
+        if name and sex and relationship and date_of_birth:
+            try:
+                # Convert date string to date object
+                dob = datetime.strptime(date_of_birth, '%Y-%m-%d').date()
+                
+                EmployeeFamily.objects.create(
+                    employee=employee,
+                    name=name,
+                    sex=sex,
+                    relationship=relationship,
+                    date_of_birth=dob
+                )
+            except ValueError:
+                # Skip invalid dates
+                continue
+
+
+def process_education_data(request, employee):
+    """Process education information from onboarding form"""
+    from employee.models import EmployeeStudied
+    
+    # Delete existing education data
+    EmployeeStudied.objects.filter(employee=employee).delete()
+    
+    # Process multiple education records
+    education_count = int(request.POST.get('education_count', 0))
+    
+    for i in range(education_count):
+        institution = request.POST.get(f'education_institution_{i}')
+        graduation_year = request.POST.get(f'education_year_{i}')
+        major = request.POST.get(f'education_major_{i}')
+        degree = request.POST.get(f'education_degree_{i}')
+        
+        if institution:
+            EmployeeStudied.objects.create(
+                employee=employee,
+                institution_name=institution,
+                graduation_year=int(graduation_year) if graduation_year else None,
+                major=major or '',
+                degree=degree or ''
+            )

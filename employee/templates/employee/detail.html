@@ -98,15 +98,15 @@
         </div>
 
         <!-- Current Position -->
-        {% if current_history %}
         <div class="card mb-4">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5>Current Position</h5>
                 <a href="{% url 'employees:employee_history_create' employee.employee_id %}" class="btn btn-sm btn-outline-primary">
-                    <i class="fas fa-plus"></i> Add Position
+                    <i class="fas fa-plus"></i> {% if current_history %}Change Position{% else %}Add Position{% endif %}
                 </a>
             </div>
             <div class="card-body">
+                {% if current_history %}
                 <div class="row">
                     <div class="col-md-6">
                         <p><strong>Position:</strong> {{ current_history.position.name }}</p>
@@ -119,9 +119,18 @@
                         <p><strong>Start Date:</strong> {{ current_history.start_date }}</p>
                     </div>
                 </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-briefcase fa-2x text-muted mb-3"></i>
+                    <h6 class="text-muted">No Position Assigned</h6>
+                    <p class="text-muted">This employee has not been assigned to any position yet.</p>
+                    <a href="{% url 'employees:employee_history_create' employee.employee_id %}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Assign First Position
+                    </a>
+                </div>
+                {% endif %}
             </div>
         </div>
-        {% endif %}
 
         <!-- Position History -->
         {% if history %}
@@ -182,11 +191,9 @@
                         <i class="fas fa-user-times"></i> Deactivate
                     </a>
                     {% endif %}
-                    {% if current_history %}
                     <a href="{% url 'employees:employee_history_create' employee.employee_id %}" class="btn btn-outline-info">
-                        <i class="fas fa-briefcase"></i> Change Position
+                        <i class="fas fa-briefcase"></i> {% if current_history %}Change Position{% else %}Assign Position{% endif %}
                     </a>
-                    {% endif %}
                 </div>
             </div>
         </div>

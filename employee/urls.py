@@ -30,3 +30,10 @@ urlpatterns = [
     path('onboarding/', onboarding_list, name='onboarding_list'),
     path('onboarding/<int:onboarding_id>/resend/', resend_onboarding, name='resend_onboarding'),
 ]
+
+# Public URLs (no login required)
+public_urlpatterns = [
+    path('onboarding/<uuid:token>/', onboarding_form, name='onboarding_form'),
+]
+
+urlpatterns += public_urlpatterns

@@ -3,13 +3,13 @@
 {% block employee_content %}
 <div class="row">
     <div class="col-12">
-        <h2>Add Position History: {{ employee.name }}</h2>
+        <h2>{% if current_history %}Change Position: {{ employee.name }}{% else %}Assign Position: {{ employee.name }}{% endif %}</h2>
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="{% url 'employees:dashboard' %}">Dashboard</a></li>
                 <li class="breadcrumb-item"><a href="{% url 'employees:employee_list' %}">Employee List</a></li>
                 <li class="breadcrumb-item"><a href="{% url 'employees:employee_detail' employee.employee_id %}">{{ employee.name }}</a></li>
-                <li class="breadcrumb-item active">Add Position</li>
+                <li class="breadcrumb-item active">{% if current_history %}Change Position{% else %}Assign Position{% endif %}</li>
             </ol>
         </nav>
     </div>
@@ -19,13 +19,20 @@
     <div class="col-md-8">
         <div class="card">
             <div class="card-header">
-                <h5>New Position Assignment</h5>
+                <h5>{% if current_history %}New Position Assignment{% else %}First Position Assignment{% endif %}</h5>
             </div>
             <div class="card-body">
+                {% if current_history %}
                 <div class="alert alert-info">
                     <strong>Note:</strong> Adding a new position will automatically end the current position 
                     and create a new active position record.
                 </div>
+                {% else %}
+                <div class="alert alert-success">
+                    <strong>First Position:</strong> This employee doesn't have any position assigned yet. 
+                    This will be their first position assignment.
+                </div>
+                {% endif %}
                 
                 <form method="post" id="positionForm">
                     {% csrf_token %}
@@ -85,7 +92,7 @@
                             <i class="fas fa-arrow-left"></i> Cancel
                         </a>
                         <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save"></i> Add Position
+                            <i class="fas fa-save"></i> {% if current_history %}Change Position{% else %}Assign Position{% endif %}
                         </button>
                     </div>
                 </form>

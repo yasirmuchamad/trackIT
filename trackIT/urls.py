@@ -16,10 +16,14 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from employee.views import onboarding_form
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('employee/', include('employee.urls')),
+    path('employees/', include('employee.urls')),
     path('inventory/', include('inventory.urls')),
     path('maintenance/', include('maintenance.urls')),
+    
+    # Public onboarding URL (no login required)
+    path('onboarding/<uuid:token>/', onboarding_form, name='onboarding_form'),
 ]

@@ -16,6 +16,10 @@ class DepartmentAdmin(admin.ModelAdmin):
 class SubdepartmentAdmin(admin.ModelAdmin):
     list_display = ['name', 'department']
 
+@admin.register(Position)
+class PositionAdmin(admin.ModelAdmin):
+    list_display = ['name', 'level', 'grade']
+
 @admin.action(description="Exit employee (Resign)")
 def exit_as_resign(modeladmin, request, queryset):
     for employee in queryset:

@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Onboarding - Complete Your Profile</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .onboarding-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        .onboarding-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+        .card-body {
+            padding: 2rem;
+        }
+        .form-control {
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            padding: 0.75rem 1rem;
+        }
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 10px;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+        }
+        .progress-bar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .alert-danger {
+            border-radius: 10px;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="onboarding-container">
+        <div class="onboarding-card">
+            <div class="card-header">
+                <h1><i class="fas fa-user-plus"></i> Welcome to the Team!</h1>
+                <p class="mb-0">Hi {{ employee.name }}, please complete your profile to finish onboarding</p>
+            </div>
+            
+            <div class="card-body">
+                <!-- Progress Bar -->
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Complete Profile Information</span>
+                        <span class="text-muted">All Sections</span>
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar" role="progressbar" style="width: 100%"></div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col text-center">
+                            <small class="text-muted"><i class="fas fa-user"></i> Personal</small>
+                        </div>
+                        <div class="col text-center">
+                            <small class="text-muted"><i class="fas fa-id-card"></i> Identity</small>
+                        </div>
+                        <div class="col text-center">
+                            <small class="text-muted"><i class="fas fa-shield-alt"></i> BPJS/Tax</small>
+                        </div>
+                        <div class="col text-center">
+                            <small class="text-muted"><i class="fas fa-home"></i> Address</small>
+                        </div>
+                        <div class="col text-center">
+                            <small class="text-muted"><i class="fas fa-users"></i> Family</small>
+                        </div>
+                        <div class="col text-center">
+                            <small class="text-muted"><i class="fas fa-graduation-cap"></i> Education</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Error Messages -->
+                {% if errors %}
+                <div class="alert alert-danger">
+                    <h6><i class="fas fa-exclamation-triangle"></i> Please fix the following errors:</h6>
+                    <ul class="mb-0">
+                        {% for error in errors %}
+                        <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                <!-- Employee Info -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="bg-light p-3 rounded">
+                            <h6 class="text-muted mb-2">Employee Information</h6>
+                            <p class="mb-1"><strong>ID:</strong> {{ employee.employee_id }}</p>
+                            <p class="mb-1"><strong>Name:</strong> {{ employee.name }}</p>
+                            <p class="mb-0"><strong>Join Date:</strong> {{ employee.join_date }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="bg-light p-3 rounded">
+                            <h6 class="text-muted mb-2">Contact Information</h6>
+                            <p class="mb-1"><strong>Email:</strong> {{ employee.private_mail|default:"Not provided" }}</p>
+                            <p class="mb-0"><strong>Phone:</strong> {{ employee.phone|default:"Not provided" }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Onboarding Form -->
+                <form method="post" id="onboardingForm">
+                    {% csrf_token %}
+                    
+                    <!-- Personal Information -->
+                    <div class="section mb-5">
+                        <h5 class="mb-3"><i class="fas fa-user"></i> Personal Information</h5>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="place_of_birth" class="form-label">Place of Birth *</label>
+                                <input type="text" class="form-control" id="place_of_birth" name="place_of_birth" 
+                                       value="{{ employee.place_of_birth|default:'' }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="date_of_birth" class="form-label">Date of Birth *</label>
+                                <input type="date" class="form-control" id="date_of_birth" name="date_of_birth" 
+                                       value="{{ employee.date_of_birth|date:'Y-m-d'|default:'' }}" required>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label for="sex" class="form-label">Gender *</label>
+                                <select class="form-control" id="sex" name="sex" required>
+                                    <option value="">Select gender...</option>
+                                    <option value="male" {% if employee.sex == 'male' %}selected{% endif %}>Male</option>
+                                    <option value="female" {% if employee.sex == 'female' %}selected{% endif %}>Female</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="religion" class="form-label">Religion</label>
+                                <select class="form-control" id="religion" name="religion">
+                                    <option value="">Select religion...</option>
+                                    <option value="islam" {% if employee.religion == 'islam' %}selected{% endif %}>Islam</option>
+                                    <option value="kristen" {% if employee.religion == 'kristen' %}selected{% endif %}>Kristen</option>
+                                    <option value="katolik" {% if employee.religion == 'katolik' %}selected{% endif %}>Katolik</option>
+                                    <option value="protestan" {% if employee.religion == 'protestan' %}selected{% endif %}>Protestan</option>
+                                    <option value="hindu" {% if employee.religion == 'hindu' %}selected{% endif %}>Hindu</option>
+                                    <option value="budha" {% if employee.religion == 'budha' %}selected{% endif %}>Budha</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="marital_status" class="form-label">Marital Status</label>
+                                <select class="form-control" id="marital_status" name="marital_status">
+                                    <option value="">Select status...</option>
+                                    <option value="single" {% if employee.marital_status == 'single' %}selected{% endif %}>Single</option>
+                                    <option value="married" {% if employee.marital_status == 'married' %}selected{% endif %}>Married</option>
+                                    <option value="devorced" {% if employee.marital_status == 'devorced' %}selected{% endif %}>Divorced</option>
+                                    <option value="widowed" {% if employee.marital_status == 'widowed' %}selected{% endif %}>Widowed</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Identity & Contact -->
+                    <div class="section mb-5">
+                        <h5 class="mb-3"><i class="fas fa-id-card"></i> Identity & Contact Information</h5>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="national_id_number" class="form-label">National ID Number (NIK) *</label>
+                                <input type="text" class="form-control" id="national_id_number" name="national_id_number" 
+                                       value="{{ employee.national_id_number|default:'' }}" maxlength="16" 
+                                       placeholder="16-digit ID number" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="family_card_number" class="form-label">Family Card Number (KK)</label>
+                                <input type="text" class="form-control" id="family_card_number" name="family_card_number" 
+                                       value="{{ employee.family_card_number|default:'' }}" maxlength="16"
+                                       placeholder="16-digit family card number">
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="phone" class="form-label">Phone Number *</label>
+                                <input type="tel" class="form-control" id="phone" name="phone" 
+                                       value="{{ employee.phone|default:'' }}" required
+                                       placeholder="e.g., 08123456789">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="blood_type" class="form-label">Blood Type</label>
+                                <select class="form-control" id="blood_type" name="blood_type">
+                                    <option value="">Select blood type...</option>
+                                    <option value="a+" {% if employee.blood_type == 'a+' %}selected{% endif %}>A+</option>
+                                    <option value="a-" {% if employee.blood_type == 'a-' %}selected{% endif %}>A-</option>
+                                    <option value="b+" {% if employee.blood_type == 'b+' %}selected{% endif %}>B+</option>
+                                    <option value="b-" {% if employee.blood_type == 'b-' %}selected{% endif %}>B-</option>
+                                    <option value="ab+" {% if employee.blood_type == 'ab+' %}selected{% endif %}>AB+</option>
+                                    <option value="ab-" {% if employee.blood_type == 'ab-' %}selected{% endif %}>AB-</option>
+                                    <option value="o+" {% if employee.blood_type == 'o+' %}selected{% endif %}>O+</option>
+                                    <option value="o-" {% if employee.blood_type == 'o-' %}selected{% endif %}>O-</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- BPJS & Tax Information -->
+                    <div class="section mb-5">
+                        <h5 class="mb-3"><i class="fas fa-shield-alt"></i> BPJS & Tax Information</h5>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label for="bpjs_employment" class="form-label">BPJS Employment Number</label>
+                                <input type="text" class="form-control" id="bpjs_employment" name="bpjs_employment" 
+                                       value="{{ employee.bpjs_employment|default:'' }}"
+                                       placeholder="BPJS Ketenagakerjaan number">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="bpjs_health" class="form-label">BPJS Health Number</label>
+                                <input type="text" class="form-control" id="bpjs_health" name="bpjs_health" 
+                                       value="{{ employee.bpjs_health|default:'' }}"
+                                       placeholder="BPJS Kesehatan number">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="tax_id" class="form-label">Tax ID (NPWP)</label>
+                                <input type="text" class="form-control" id="tax_id" name="tax_id" 
+                                       value="{{ employee.tax_id|default:'' }}"
+                                       placeholder="NPWP number">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Address Information -->
+                    <div class="section mb-5">
+                        <h5 class="mb-3"><i class="fas fa-home"></i> Address Information</h5>
+                        
+                        <h6 class="mb-3">Current Address *</h6>
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <label for="current_address" class="form-label">Street Address *</label>
+                                <textarea class="form-control" id="current_address" name="current_address" rows="2" 
+                                          placeholder="Complete street address" required></textarea>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-3">
+                                <label for="current_village" class="form-label">Village/Kelurahan *</label>
+                                <input type="text" class="form-control" id="current_village" name="current_village" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="current_district" class="form-label">District/Kecamatan *</label>
+                                <input type="text" class="form-control" id="current_district" name="current_district" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="current_city" class="form-label">City/Kabupaten *</label>
+                                <input type="text" class="form-control" id="current_city" name="current_city" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="current_province" class="form-label">Province *</label>
+                                <input type="text" class="form-control" id="current_province" name="current_province" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="same_address" name="same_address" checked>
+                            <label class="form-check-label" for="same_address">
+                                Registered address is the same as current address
+                            </label>
+                        </div>
+                        
+                        <div id="registered_address_section" style="display: none;">
+                            <h6 class="mb-3">Registered Address (ID Card Address)</h6>
+                            <div class="row mb-3">
+                                <div class="col-12">
+                                    <label for="registered_address" class="form-label">Street Address</label>
+                                    <textarea class="form-control" id="registered_address" name="registered_address" rows="2" 
+                                              placeholder="Complete street address"></textarea>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-3">
+                                    <label for="registered_village" class="form-label">Village/Kelurahan</label>
+                                    <input type="text" class="form-control" id="registered_village" name="registered_village">
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="registered_district" class="form-label">District/Kecamatan</label>
+                                    <input type="text" class="form-control" id="registered_district" name="registered_district">
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="registered_city" class="form-label">City/Kabupaten</label>
+                                    <input type="text" class="form-control" id="registered_city" name="registered_city">
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="registered_province" class="form-label">Province</label>
+                                    <input type="text" class="form-control" id="registered_province" name="registered_province">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Family Information -->
+                    <div class="section mb-5">
+                        <h5 class="mb-3"><i class="fas fa-users"></i> Family Information</h5>
+                        
+                        <div id="family_section">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <p class="text-muted mb-0">Add your family members (spouse, children, parents)</p>
+                                <button type="button" class="btn btn-outline-primary btn-sm" onclick="addFamily()">
+                                    <i class="fas fa-plus"></i> Add Family Member
+                                </button>
+                            </div>
+                            
+                            <div id="family_list">
+                                <!-- Family members will be added here dynamically -->
+                            </div>
+                        </div>
+                        
+                        <input type="hidden" id="family_count" name="family_count" value="0">
+                    </div>
+                    
+                    <!-- Education Information -->
+                    <div class="section mb-5">
+                        <h5 class="mb-3"><i class="fas fa-graduation-cap"></i> Education Information</h5>
+                        
+                        <div id="education_section">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <p class="text-muted mb-0">Add your educational background</p>
+                                <button type="button" class="btn btn-outline-primary btn-sm" onclick="addEducation()">
+                                    <i class="fas fa-plus"></i> Add Education
+                                </button>
+                            </div>
+                            
+                            <div id="education_list">
+                                <!-- Education records will be added here dynamically -->
+                            </div>
+                        </div>
+                        
+                        <input type="hidden" id="education_count" name="education_count" value="0">
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Note:</strong> Fields marked with * are required. All other information helps us serve you better and can be updated later through HR.
+                    </div>
+                    
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-check"></i> Complete Onboarding
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="text-center mt-3">
+            <p class="text-white-50">
+                <i class="fas fa-shield-alt"></i> Your information is secure and will only be used for HR purposes.
+            </p>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let familyCount = 0;
+        let educationCount = 0;
+        
+        // Toggle registered address section
+        document.getElementById('same_address').addEventListener('change', function() {
+            const registeredSection = document.getElementById('registered_address_section');
+            if (this.checked) {
+                registeredSection.style.display = 'none';
+            } else {
+                registeredSection.style.display = 'block';
+            }
+        });
+        
+        // Add family member
+        function addFamily() {
+            const familyList = document.getElementById('family_list');
+            const familyHtml = `
+                <div class="family-item border rounded p-3 mb-3" id="family_${familyCount}">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="mb-0">Family Member ${familyCount + 1}</h6>
+                        <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeFamily(${familyCount})">
+                            <i class="fas fa-trash"></i> Remove
+                        </button>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-2">
+                            <label class="form-label">Full Name *</label>
+                            <input type="text" class="form-control" name="family_name_${familyCount}" required>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <label class="form-label">Gender *</label>
+                            <select class="form-control" name="family_sex_${familyCount}" required>
+                                <option value="">Select...</option>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <label class="form-label">Date of Birth *</label>
+                            <input type="date" class="form-control" name="family_dob_${familyCount}" required>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <label class="form-label">Relationship *</label>
+                            <select class="form-control" name="family_relationship_${familyCount}" required>
+                                <option value="">Select relationship...</option>
+                                <option value="spouse">Spouse</option>
+                                <option value="child">Child</option>
+                                <option value="father">Father</option>
+                                <option value="mother">Mother</option>
+                                <option value="father_in_law">Father-in-law</option>
+                                <option value="mother_in_law">Mother-in-law</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            familyList.insertAdjacentHTML('beforeend', familyHtml);
+            familyCount++;
+            document.getElementById('family_count').value = familyCount;
+        }
+        
+        // Remove family member
+        function removeFamily(index) {
+            const familyItem = document.getElementById(`family_${index}`);
+            if (familyItem) {
+                familyItem.remove();
+                // Update family count
+                const remainingFamilies = document.querySelectorAll('.family-item').length;
+                document.getElementById('family_count').value = remainingFamilies;
+            }
+        }
+        
+        // Add education
+        function addEducation() {
+            const educationList = document.getElementById('education_list');
+            const educationHtml = `
+                <div class="education-item border rounded p-3 mb-3" id="education_${educationCount}">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="mb-0">Education ${educationCount + 1}</h6>
+                        <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeEducation(${educationCount})">
+                            <i class="fas fa-trash"></i> Remove
+                        </button>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-2">
+                            <label class="form-label">Institution Name *</label>
+                            <input type="text" class="form-control" name="education_institution_${educationCount}" 
+                                   placeholder="School/University name" required>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <label class="form-label">Graduation Year</label>
+                            <input type="number" class="form-control" name="education_year_${educationCount}" 
+                                   min="1950" max="2030" placeholder="e.g., 2020">
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <label class="form-label">Degree</label>
+                            <input type="text" class="form-control" name="education_degree_${educationCount}" 
+                                   placeholder="e.g., S1, SMA, D3">
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <label class="form-label">Major/Field of Study</label>
+                            <input type="text" class="form-control" name="education_major_${educationCount}" 
+                                   placeholder="e.g., Computer Science, Accounting">
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            educationList.insertAdjacentHTML('beforeend', educationHtml);
+            educationCount++;
+            document.getElementById('education_count').value = educationCount;
+        }
+        
+        // Remove education
+        function removeEducation(index) {
+            const educationItem = document.getElementById(`education_${index}`);
+            if (educationItem) {
+                educationItem.remove();
+                // Update education count
+                const remainingEducations = document.querySelectorAll('.education-item').length;
+                document.getElementById('education_count').value = remainingEducations;
+            }
+        }
+        
+        // Auto-add one family and education on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // You can uncomment these to auto-add initial forms
+            // addFamily();
+            // addEducation();
+        });
+    </script>
+</body>
+</html>
