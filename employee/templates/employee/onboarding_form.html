@@ -437,7 +437,38 @@
                                 <option value="mother">Mother</option>
                                 <option value="father_in_law">Father-in-law</option>
                                 <option value="mother_in_law">Mother-in-law</option>
+                                <option value="sibling">Sibling</option>
+                                <option value="other">Other</option>
                             </select>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <label class="form-label">Phone Number</label>
+                            <input type="tel" class="form-control" name="family_phone_${familyCount}" 
+                                   placeholder="e.g., 08123456789">
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-2">
+                        <div class="col-md-8">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="family_emergency_${familyCount}" 
+                                       id="family_emergency_${familyCount}" onchange="toggleEmergencyPriority(${familyCount})">
+                                <label class="form-check-label" for="family_emergency_${familyCount}">
+                                    <strong>Emergency Contact</strong> - Can be contacted in case of emergency
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div id="priority_section_${familyCount}" style="display: none;">
+                                <label class="form-label">Priority</label>
+                                <select class="form-control form-control-sm" name="family_priority_${familyCount}">
+                                    <option value="1">1 (Highest)</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5 (Lowest)</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -446,6 +477,18 @@
             familyList.insertAdjacentHTML('beforeend', familyHtml);
             familyCount++;
             document.getElementById('family_count').value = familyCount;
+        }
+        
+        // Toggle emergency priority section
+        function toggleEmergencyPriority(index) {
+            const checkbox = document.querySelector(`input[name="family_emergency_${index}"]`);
+            const prioritySection = document.getElementById(`priority_section_${index}`);
+            
+            if (checkbox.checked) {
+                prioritySection.style.display = 'block';
+            } else {
+                prioritySection.style.display = 'none';
+            }
         }
         
         // Remove family member

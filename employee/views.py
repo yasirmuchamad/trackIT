@@ -642,6 +642,9 @@ def process_family_data(request, employee):
         sex = request.POST.get(f'family_sex_{i}')
         relationship = request.POST.get(f'family_relationship_{i}')
         date_of_birth = request.POST.get(f'family_dob_{i}')
+        phone = request.POST.get(f'family_phone_{i}', '')
+        is_emergency = request.POST.get(f'family_emergency_{i}') == 'on'
+        emergency_priority = request.POST.get(f'family_priority_{i}', 1)
         
         if name and sex and relationship and date_of_birth:
             try:
@@ -653,7 +656,10 @@ def process_family_data(request, employee):
                     name=name,
                     sex=sex,
                     relationship=relationship,
-                    date_of_birth=dob
+                    date_of_birth=dob,
+                    phone=phone,
+                    is_emergency_contact=is_emergency,
+                    emergency_priority=int(emergency_priority) if emergency_priority else 1
                 )
             except ValueError:
                 # Skip invalid dates

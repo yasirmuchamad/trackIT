@@ -257,6 +257,18 @@ class Employee(models.Model):
                 raise ValidationError({
                     'last_working_date':'Last working date cannot after exit date.'
                 })
+    
+    def get_emergency_contacts(self):
+        """Get emergency contacts for this employee"""
+        return self.families.filter(is_emergency_contact=True).order_by('emergency_priority', 'name')
+    
+    def get_primary_emergency_contact(self):
+        """Get the primary (highest priority) emergency contact"""
+        return self.families.filter(is_emergency_contact=True).order_by('emergency_priority').first()
+    
+    def has_emergency_contact(self):
+        """Check if employee has at least one emergency contact"""
+        return self.families.filter(is_emergency_contact=True).exists()
         
 
 
@@ -296,6 +308,8 @@ class EmployeeFamily(models.Model):
         ('father_in_law', 'Father-in-law'),
         ('mother_in_law', 'Mother-in-law'),
         ('spouse', 'Spouse'),
+        ('sibling', 'Sibling'),
+        ('other', 'Other'),
     ]
 
     SEX = [
@@ -313,15 +327,37 @@ class EmployeeFamily(models.Model):
     relationship    = models.CharField(max_length=15, 
                                        choices=FAMILY_RELATION)
     date_of_birth   = models.DateField()
+    
+    # Emergency contact fields
+    phone           = models.CharField(max_length=16, 
+                                       blank=True, 
+                                       help_text="Phone number for this family member")
+    is_emergency_contact = models.BooleanField(
+                                       default=False,
+                                       help_text="Can this person be contacted in case of emergency?")
+    emergency_priority = models.PositiveSmallIntegerField(
+                                       default=1,
+                                       help_text="Priority order for emergency contact (1=highest priority)")
+    
     class Meta:
         """Meta definition for Employee_family."""
 
         verbose_name = 'Employee Family'
         verbose_name_plural = 'Employee Families'
+        ordering = ['emergency_priority', 'relationship', 'name']
 
     def __str__(self):
         """Unicode representation of Employee_family."""
-        return f"{self.employee.name} - {self.relationship} - {self.name}"
+        emergency_indicator = " (Emergency Contact)" if self.is_emergency_contact else ""
+        return f"{self.employee.name} - {self.relationship} - {self.name}{emergency_indicator}"
+    
+    @classmethod
+    def get_emergency_contacts(cls, employee):
+        """Get all emergency contacts for an employee, ordered by priority"""
+        return cls.objects.filter(
+            employee=employee, 
+            is_emergency_contact=True
+        ).order_by('emergency_priority', 'name')
     
 class EmployeeStudied(models.Model):
     """Model definition for Employee_studied."""

@@ -271,6 +271,28 @@
                     <!-- Family Tab -->
                     <div class="tab-pane fade" id="family" role="tabpanel">
                         {% if families %}
+                            <!-- Emergency Contacts Section -->
+                            {% with emergency_contacts=employee.get_emergency_contacts %}
+                                {% if emergency_contacts %}
+                                <div class="alert alert-info mb-4">
+                                    <h6><i class="fas fa-phone-alt"></i> Emergency Contacts</h6>
+                                    {% for contact in emergency_contacts %}
+                                    <div class="d-flex justify-content-between align-items-center {% if not forloop.last %}border-bottom pb-2 mb-2{% endif %}">
+                                        <div>
+                                            <strong>{{ contact.name }}</strong> ({{ contact.get_relationship_display }})
+                                            {% if contact.phone %}
+                                                <br><i class="fas fa-phone text-muted"></i> {{ contact.phone }}
+                                            {% endif %}
+                                        </div>
+                                        <span class="badge bg-danger">Priority {{ contact.emergency_priority }}</span>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            {% endwith %}
+                            
+                            <!-- All Family Members -->
+                            <h6>All Family Members</h6>
                             <div class="table-responsive">
                                 <table class="table table-striped">
                                     <thead>
@@ -279,6 +301,8 @@
                                             <th>Relationship</th>
                                             <th>Gender</th>
                                             <th>Date of Birth</th>
+                                            <th>Phone</th>
+                                            <th>Emergency Contact</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -288,6 +312,20 @@
                                             <td>{{ family.get_relationship_display }}</td>
                                             <td>{{ family.get_sex_display }}</td>
                                             <td>{{ family.date_of_birth }}</td>
+                                            <td>
+                                                {% if family.phone %}
+                                                    <i class="fas fa-phone text-muted"></i> {{ family.phone }}
+                                                {% else %}
+                                                    <span class="text-muted">-</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if family.is_emergency_contact %}
+                                                    <span class="badge bg-danger">Emergency (Priority {{ family.emergency_priority }})</span>
+                                                {% else %}
+                                                    <span class="text-muted">-</span>
+                                                {% endif %}
+                                            </td>
                                         </tr>
                                         {% endfor %}
                                     </tbody>
