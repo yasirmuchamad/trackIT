@@ -6,6 +6,7 @@ from django.db.models import Q
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.urls import reverse
+import logging
 
 from employee.forms import EmployeeCreateForm, EmployeeUpdateForm, EmployeeSearchForm
 from employee.models import (
@@ -14,6 +15,8 @@ from employee.models import (
     Unit, Department, Subdepartment, Position
 )
 from employee.services.onboarding_delivery import send_onboarding_links
+
+logger = logging.getLogger(__name__)
 
 
 # Employee CRUD Views
@@ -397,15 +400,26 @@ def onboarding_list(request):
 @login_required
 def resend_onboarding(request, onboarding_id):
     """Resend onboarding link"""
+    logger.info(f"resend_onboarding called with onboarding_id: {onboarding_id}")
+    logger.info(f"Request method: {request.method}")
+    logger.info(f"User: {request.user}")
+    
     onboarding = get_object_or_404(EmployeeOnboarding, id=onboarding_id)
     
+    logger.info(f"Found onboarding for employee: {onboarding.employee.name}")
+    logger.info(f"Employee email: {onboarding.employee.private_mail}")
+    logger.info(f"Employee phone: {onboarding.employee.phone}")
+    
     if request.method == "POST":
+        logger.info("Processing POST request for resend")
         try:
             results = send_onboarding_links(
                 onboarding,
                 email=onboarding.employee.private_mail,
                 phone=onboarding.employee.phone,
             )
+            
+            logger.info(f"send_onboarding_links returned: {results}")
             
             # Check results and show appropriate messages
             success_messages = []
@@ -422,6 +436,9 @@ def resend_onboarding(request, onboarding_id):
                     success_messages.append(f"WhatsApp sent to {onboarding.employee.phone}")
                 else:
                     error_messages.append(f"failed to send WhatsApp to {onboarding.employee.phone}")
+            
+            logger.info(f"Success messages: {success_messages}")
+            logger.info(f"Error messages: {error_messages}")
             
             if success_messages:
                 messages.success(
@@ -444,8 +461,10 @@ def resend_onboarding(request, onboarding_id):
                 )
                 
         except Exception as e:
+            logger.error(f"Exception in resend_onboarding: {str(e)}", exc_info=True)
             messages.error(request, f"Failed to resend onboarding notifications: {str(e)}")
     
+    logger.info("Redirecting to onboarding_list")
     return redirect("employees:onboarding_list")
 
 

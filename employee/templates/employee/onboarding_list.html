@@ -79,10 +79,9 @@
                                 </td>
                                 <td>
                                     {% if not onboarding.is_completed %}
-                                    <form method="post" action="{% url 'employees:resend_onboarding' onboarding.id %}" class="d-inline">
+                                    <form method="post" action="{% url 'employees:resend_onboarding' onboarding.id %}" class="d-inline" id="resend-form-{{ onboarding.id }}">
                                         {% csrf_token %}
-                                        <button type="submit" class="btn btn-sm btn-outline-primary" 
-                                                onclick="return confirm('Resend onboarding link to {{ onboarding.employee.name }}?')">
+                                        <button type="submit" class="btn btn-sm btn-outline-primary">
                                             <i class="fas fa-paper-plane"></i> Resend
                                         </button>
                                     </form>

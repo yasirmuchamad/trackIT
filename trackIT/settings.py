@@ -12,10 +12,48 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 import os
 from pathlib import Path
-from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Manual .env loader (fallback if decouple fails)
+def load_env_manual():
+    """Manually load .env file"""
+    env_path = BASE_DIR / '.env'
+    if env_path.exists():
+        try:
+            with open(env_path, 'r', encoding='utf-8') as f:
+                for line in f:
+                    line = line.strip()
+                    if line and not line.startswith('#') and '=' in line:
+                        key, value = line.split('=', 1)
+                        os.environ.setdefault(key, value)
+        except Exception as e:
+            print(f"Warning: Could not load .env file: {e}")
+
+# Load .env file manually first
+load_env_manual()
+
+# Try decouple as primary, fallback to os.environ
+try:
+    from decouple import config, Csv
+    # Test if decouple can read a variable
+    test_var = config('WHATSAPP_SERVICE_URL', default='DECOUPLE_TEST_FAILED')
+    if test_var == 'DECOUPLE_TEST_FAILED':
+        raise ImportError("Decouple not reading .env properly")
+except (ImportError, Exception):
+    # Fallback to manual loading
+    def config(key, default=None, cast=str):
+        value = os.environ.get(key, default)
+        if cast and value is not None:
+            return cast(value)
+        return value
+    
+    class Csv:
+        def __init__(self, cast=str):
+            self.cast = cast
+        def __call__(self, value):
+            return [self.cast(item.strip()) for item in value.split(',')]
 
 
 # Quick-start development settings - unsuitable for production
@@ -27,7 +65,7 @@ SECRET_KEY = 'django-insecure-vegwwa+2#dw$-om7udw*^7smt37#he_r(#qllxek7fs*e38(uu
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['testserver', 'localhost', '127.0.0.1']
 
 
 # Application definition
@@ -162,12 +200,12 @@ DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default=EMAIL_HOST_USER)
 FRONT_END_BASE_URL = config('FRONT_END_BASE_URL', default='http://localhost:8000')
 
 # WhatsApp Configuration
-WHATSAPP_SERVICE_URL = config('WHATSAPP_SERVICE_URL', default='')
-WHATSAPP_SERVICE_TOKEN = config('WHATSAPP_SERVICE_TOKEN', default='')
+WHATSAPP_SERVICE_URL = config('WHATSAPP_SERVICE_URL', default='https://api.fonnte.com/send')
+WHATSAPP_SERVICE_TOKEN = config('WHATSAPP_SERVICE_TOKEN', default='')  # Empty default if not in .env
 
-# WhatsApp Business API (alternative)
-WHATSAPP_API_URL = config('WHATSAPP_API_URL', default='')
-WHATSAPP_API_TOKEN = config('WHATSAPP_API_TOKEN', default='')
+# WhatsApp Business API (alternative) - DISABLED to use Fonnte
+# WHATSAPP_API_URL = config('WHATSAPP_API_URL', default='https://api.fonnte.com/send')
+# WHATSAPP_API_TOKEN = config('WHATSAPP_API_TOKEN', default='')  # Empty default
 
 # =============================================================================
 # LOGGING CONFIGURATION
@@ -203,6 +241,16 @@ LOGGING = {
         'employee.services.onboarding_delivery': {
             'handlers': ['file', 'console'],
             'level': 'INFO',
+            'propagate': True,
+        },
+        'employee.views': {
+            'handlers': ['file', 'console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'django.request': {
+            'handlers': ['file', 'console'],
+            'level': 'WARNING',
             'propagate': True,
         },
     },

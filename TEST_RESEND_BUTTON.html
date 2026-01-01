@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Resend Button</title>
+</head>
+<body>
+    <h1>Test Resend Button</h1>
+    
+    <!-- Test form without confirm dialog -->
+    <form method="post" action="/employees/onboarding/2/resend/">
+        <input type="hidden" name="csrfmiddlewaretoken" value="test">
+        <button type="submit" style="padding: 10px; background: blue; color: white;">
+            Test Resend (No Confirm)
+        </button>
+    </form>
+    
+    <br><br>
+    
+    <!-- Test form with simple confirm -->
+    <form method="post" action="/employees/onboarding/2/resend/" 
+          onsubmit="return confirm('Are you sure?')">
+        <input type="hidden" name="csrfmiddlewaretoken" value="test">
+        <button type="submit" style="padding: 10px; background: green; color: white;">
+            Test Resend (With Confirm)
+        </button>
+    </form>
+    
+    <br><br>
+    
+    <p><strong>Instructions:</strong></p>
+    <ol>
+        <li>Save this file as test.html</li>
+        <li>Open in browser</li>
+        <li>Open Developer Tools → Network tab</li>
+        <li>Click buttons and see if POST requests appear</li>
+        <li>Replace "/employees/onboarding/2/resend/" with actual onboarding ID</li>
+    </ol>
+    
+    <p><strong>Expected:</strong></p>
+    <ul>
+        <li>First button: Should send POST immediately</li>
+        <li>Second button: Should show confirm, then send POST if OK clicked</li>
+        <li>Both should show POST request in Network tab</li>
+    </ul>
+</body>
+</html>
