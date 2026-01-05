@@ -16,9 +16,17 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
+from django.shortcuts import redirect
 from employee.views import onboarding_form
 
+def home_redirect(request):
+    """Redirect root URL to employee dashboard"""
+    return redirect('employees:dashboard')
+
 urlpatterns = [
+    path('', home_redirect, name='home'),  # Add default redirect
     path('admin/', admin.site.urls),
     path('employees/', include('employee.urls')),
     path('inventory/', include('inventory.urls')),
@@ -27,3 +35,7 @@ urlpatterns = [
     # Public onboarding URL (no login required)
     path('onboarding/<uuid:token>/', onboarding_form, name='onboarding_form'),
 ]
+
+# Serve media files in development
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

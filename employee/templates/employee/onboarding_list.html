@@ -79,12 +79,35 @@
                                 </td>
                                 <td>
                                     {% if not onboarding.is_completed %}
-                                    <form method="post" action="{% url 'employees:resend_onboarding' onboarding.id %}" class="d-inline" id="resend-form-{{ onboarding.id }}">
-                                        {% csrf_token %}
-                                        <button type="submit" class="btn btn-sm btn-outline-primary">
-                                            <i class="fas fa-paper-plane"></i> Resend
-                                        </button>
-                                    </form>
+                                        <div class="btn-group" role="group">
+                                            <!-- Resend Button -->
+                                            <form method="post" action="{% url 'employees:resend_onboarding' onboarding.id %}" class="d-inline">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-sm btn-outline-primary" title="Resend current link">
+                                                    <i class="fas fa-paper-plane"></i> Resend
+                                                </button>
+                                            </form>
+                                            
+                                            {% if onboarding.is_expired %}
+                                                <!-- Regenerate Token Button (for expired) -->
+                                                <form method="post" action="{% url 'employees:regenerate_onboarding_token' onboarding.employee.id %}" class="d-inline">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-sm btn-warning" title="Generate new token and extend expiration">
+                                                        <i class="fas fa-refresh"></i> New Token
+                                                    </button>
+                                                </form>
+                                            {% else %}
+                                                <!-- Extend Expiration Button (for active) -->
+                                                <form method="post" action="{% url 'employees:extend_onboarding_expiration' onboarding.employee.id %}" class="d-inline">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-sm btn-info" title="Extend expiration by 7 days">
+                                                        <i class="fas fa-clock"></i> Extend
+                                                    </button>
+                                                </form>
+                                            {% endif %}
+                                        </div>
+                                    {% else %}
+                                        <span class="text-muted">Completed</span>
                                     {% endif %}
                                 </td>
                             </tr>

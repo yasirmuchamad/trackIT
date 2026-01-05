@@ -24,6 +24,25 @@
 </div>
 
 <div class="row">
+    <!-- Employee Photo -->
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>Employee Photo</h5>
+            </div>
+            <div class="card-body text-center">
+                {% if employee.photo %}
+                    <img src="{{ employee.photo.url }}" alt="{{ employee.name }}" class="img-fluid rounded" style="max-width: 100%; max-height: 300px;">
+                {% else %}
+                    <div class="text-muted">
+                        <i class="fas fa-user fa-5x mb-3"></i>
+                        <p>No photo uploaded</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
     <!-- Basic Information -->
     <div class="col-md-8">
         <div class="card mb-4">
@@ -353,6 +372,19 @@
                         {% else %}
                             <p class="text-muted">No education information available.</p>
                         {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Work Experience Information -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-briefcase me-2"></i>
+                            Work Experience
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% include 'employee/work_experience_display.html' with work_experiences=employee.work_experiences.all %}
                     </div>
                 </div>
             </div>

@@ -362,6 +362,29 @@
                         <input type="hidden" id="education_count" name="education_count" value="0">
                     </div>
                     
+                    <!-- Work Experience Information -->
+                    <div class="section mb-5">
+                        <h5 class="mb-3">
+                            <i class="fas fa-briefcase"></i> Work Experience
+                            <small class="text-muted">(Last 3 companies)</small>
+                        </h5>
+                        
+                        <div id="work_experience_section">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <p class="text-muted mb-0">Add your previous work experience (maximum 3 companies)</p>
+                                <button type="button" class="btn btn-outline-primary btn-sm" onclick="addWorkExperience()">
+                                    <i class="fas fa-plus"></i> Add Experience
+                                </button>
+                            </div>
+                            
+                            <div id="work_experience_list">
+                                <!-- Work experience records will be added here dynamically -->
+                            </div>
+                        </div>
+                        
+                        <input type="hidden" id="work_experience_count" name="work_experience_count" value="0">
+                    </div>
+                    
                     <div class="alert alert-info">
                         <i class="fas fa-info-circle"></i>
                         <strong>Note:</strong> Fields marked with * are required. All other information helps us serve you better and can be updated later through HR.
@@ -387,6 +410,7 @@
     <script>
         let familyCount = 0;
         let educationCount = 0;
+        let workExperienceCount = 0;
         
         // Toggle registered address section
         document.getElementById('same_address').addEventListener('change', function() {
@@ -552,6 +576,111 @@
                 // Update education count
                 const remainingEducations = document.querySelectorAll('.education-item').length;
                 document.getElementById('education_count').value = remainingEducations;
+            }
+        }
+        
+        // Add work experience
+        function addWorkExperience() {
+            if (workExperienceCount >= 3) {
+                alert('Maximum 3 work experiences allowed');
+                return;
+            }
+            
+            const workExperienceList = document.getElementById('work_experience_list');
+            const workExperienceHtml = `
+                <div class="work-experience-item border rounded p-3 mb-3" id="work_experience_${workExperienceCount}">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="mb-0">Work Experience ${workExperienceCount + 1}</h6>
+                        <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeWorkExperience(${workExperienceCount})">
+                            <i class="fas fa-trash"></i> Remove
+                        </button>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-2">
+                            <label class="form-label">Company Name *</label>
+                            <input type="text" class="form-control" name="work_company_${workExperienceCount}" 
+                                   placeholder="Company name" required>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <label class="form-label">Position *</label>
+                            <input type="text" class="form-control" name="work_position_${workExperienceCount}" 
+                                   placeholder="Job title/position" required>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <label class="form-label">Department</label>
+                            <input type="text" class="form-control" name="work_department_${workExperienceCount}" 
+                                   placeholder="Department/division">
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <label class="form-label">Start Date *</label>
+                            <input type="date" class="form-control" name="work_start_date_${workExperienceCount}" required>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <label class="form-label">End Date *</label>
+                            <input type="date" class="form-control" name="work_end_date_${workExperienceCount}" required>
+                        </div>
+                        <div class="col-12 mb-2">
+                            <label class="form-label">Job Description</label>
+                            <textarea class="form-control" name="work_description_${workExperienceCount}" rows="3" 
+                                      placeholder="Describe your responsibilities and achievements"></textarea>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <label class="form-label">Reason for Leaving</label>
+                            <input type="text" class="form-control" name="work_reason_${workExperienceCount}" 
+                                   placeholder="Why did you leave this job?">
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <label class="form-label">Salary Range</label>
+                            <input type="text" class="form-control" name="work_salary_${workExperienceCount}" 
+                                   placeholder="e.g., 5-7 million (optional)">
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <label class="form-label">Supervisor Name</label>
+                            <input type="text" class="form-control" name="work_supervisor_${workExperienceCount}" 
+                                   placeholder="Direct supervisor name">
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <label class="form-label">Supervisor Contact</label>
+                            <input type="text" class="form-control" name="work_supervisor_contact_${workExperienceCount}" 
+                                   placeholder="Email or phone number">
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            workExperienceList.insertAdjacentHTML('beforeend', workExperienceHtml);
+            workExperienceCount++;
+            document.getElementById('work_experience_count').value = workExperienceCount;
+            
+            // Update button visibility
+            updateWorkExperienceButton();
+        }
+        
+        // Remove work experience
+        function removeWorkExperience(index) {
+            const workExperienceItem = document.getElementById(`work_experience_${index}`);
+            if (workExperienceItem) {
+                workExperienceItem.remove();
+                // Update work experience count
+                const remainingWorkExperiences = document.querySelectorAll('.work-experience-item').length;
+                document.getElementById('work_experience_count').value = remainingWorkExperiences;
+                workExperienceCount = remainingWorkExperiences;
+                
+                // Update button visibility
+                updateWorkExperienceButton();
+            }
+        }
+        
+        // Update work experience button visibility
+        function updateWorkExperienceButton() {
+            const addButton = document.querySelector('#work_experience_section button');
+            const currentCount = document.querySelectorAll('.work-experience-item').length;
+            
+            if (currentCount >= 3) {
+                addButton.style.display = 'none';
+            } else {
+                addButton.style.display = 'inline-block';
             }
         }
         

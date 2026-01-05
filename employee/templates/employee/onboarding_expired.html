@@ -8,61 +8,136 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         body {
-            background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         .expired-container {
-            max-width: 600px;
-            margin: 4rem auto;
+            max-width: 500px;
+            margin: 2rem auto;
             padding: 0 1rem;
         }
         .expired-card {
             background: white;
             border-radius: 15px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
             text-align: center;
-            padding: 3rem 2rem;
+        }
+        .card-header {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: white;
+            padding: 2rem;
+        }
+        .card-body {
+            padding: 2rem;
         }
         .expired-icon {
             font-size: 4rem;
-            color: #ffc107;
+            color: #ff6b6b;
             margin-bottom: 1rem;
+        }
+        .btn-contact {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 10px;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            color: white;
+            text-decoration: none;
+            display: inline-block;
+            margin: 0.5rem;
+        }
+        .btn-contact:hover {
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
     </style>
 </head>
 <body>
     <div class="expired-container">
         <div class="expired-card">
-            <div class="expired-icon">
-                <i class="fas fa-clock"></i>
+            <div class="card-header">
+                <i class="fas fa-clock expired-icon"></i>
+                <h2 class="mb-0">Onboarding Link Expired</h2>
             </div>
-            
-            <h1 class="text-warning mb-3">Link Expired</h1>
-            
-            <p class="lead mb-4">
-                Sorry {{ onboarding.employee.name }}, this onboarding link has expired.
-            </p>
-            
-            <div class="bg-light p-3 rounded mb-4">
-                <p class="mb-1"><strong>Employee:</strong> {{ onboarding.employee.name }}</p>
-                <p class="mb-1"><strong>Employee ID:</strong> {{ onboarding.employee.employee_id }}</p>
-                <p class="mb-0"><strong>Link Expired:</strong> {{ onboarding.expires_at|date:"F d, Y at g:i A" }}</p>
+            <div class="card-body">
+                <h4 class="mb-3">Hello {{ onboarding.employee.name }}!</h4>
+                
+                <p class="text-muted mb-4">
+                    Your onboarding link has expired on 
+                    <strong>{{ onboarding.expires_at|date:"F d, Y \a\t H:i" }}</strong>
+                </p>
+                
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Don't worry!</strong> This happens for security reasons.
+                </div>
+                
+                <h5 class="mb-3">What to do next:</h5>
+                
+                <div class="row text-start">
+                    <div class="col-12 mb-3">
+                        <div class="d-flex align-items-start">
+                            <i class="fas fa-envelope text-primary me-3 mt-1"></i>
+                            <div>
+                                <strong>Contact HR Department</strong>
+                                <p class="text-muted mb-0">Ask them to generate a new onboarding link for you</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-12 mb-3">
+                        <div class="d-flex align-items-start">
+                            <i class="fas fa-phone text-success me-3 mt-1"></i>
+                            <div>
+                                <strong>Call HR Office</strong>
+                                <p class="text-muted mb-0">They can extend your onboarding link immediately</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-12 mb-3">
+                        <div class="d-flex align-items-start">
+                            <i class="fas fa-user-tie text-info me-3 mt-1"></i>
+                            <div>
+                                <strong>Contact Your Manager</strong>
+                                <p class="text-muted mb-0">Your direct supervisor can also help with this</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <a href="mailto:hr@company.com" class="btn-contact">
+                        <i class="fas fa-envelope me-2"></i>
+                        Email HR
+                    </a>
+                    <a href="tel:+1234567890" class="btn-contact">
+                        <i class="fas fa-phone me-2"></i>
+                        Call HR
+                    </a>
+                </div>
+                
+                <div class="mt-4 pt-3 border-top">
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Onboarding links expire after 3-7 days for security purposes
+                    </small>
+                </div>
             </div>
-            
-            <div class="alert alert-warning">
-                <i class="fas fa-exclamation-triangle"></i>
-                <strong>What to do next?</strong><br>
-                Please contact your HR representative to request a new onboarding link.
-            </div>
-            
-            <p class="text-muted">
-                For security reasons, onboarding links expire after a certain period. 
-                Your HR team can generate a new link for you.
+        </div>
+        
+        <div class="text-center mt-3">
+            <p class="text-white-50">
+                <i class="fas fa-shield-alt"></i> 
+                Your security is our priority. Links expire to protect your personal information.
             </p>
         </div>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

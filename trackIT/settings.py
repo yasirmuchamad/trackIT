@@ -104,6 +104,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'employee.context_processors.menu_context',
             ],
         },
     },
@@ -180,10 +181,10 @@ REST_FRAMEWORK = {
 # EMAIL CONFIGURATION
 # =============================================================================
 
-# Email backend configuration
-EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
+# Email backend configuration - Force SMTP backend for production
+EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.smtp.EmailBackend')
 
-# SMTP Configuration (only used if EMAIL_BACKEND is SMTP)
+# SMTP Configuration
 EMAIL_HOST = config('EMAIL_HOST', default='smtphz.qiye.163.com')
 EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
 EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
@@ -191,6 +192,9 @@ EMAIL_USE_SSL = config('EMAIL_USE_SSL', default=False, cast=bool)
 EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
 DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default=EMAIL_HOST_USER)
+
+# Email timeout settings (to prevent connection issues)
+EMAIL_TIMEOUT = 30
 
 # =============================================================================
 # ONBOARDING CONFIGURATION
@@ -230,6 +234,7 @@ LOGGING = {
             'class': 'logging.FileHandler',
             'filename': BASE_DIR / 'logs' / 'onboarding.log',
             'formatter': 'verbose',
+            'encoding': 'utf-8',  # Fix Unicode issues
         },
         'console': {
             'level': 'INFO',
@@ -255,3 +260,7 @@ LOGGING = {
         },
     },
 }
+
+# Media files (uploads)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'

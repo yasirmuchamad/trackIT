@@ -21,7 +21,7 @@
                 <h5>Employee Information</h5>
             </div>
             <div class="card-body">
-                <form method="post">
+                <form method="post" enctype="multipart/form-data">
                     {% csrf_token %}
                     
                     <!-- Basic Information -->
@@ -108,6 +108,11 @@
                         <div class="col-md-6">
                             <label for="{{ form.blood_type.id_for_label }}" class="form-label">Blood Type</label>
                             {{ form.blood_type }}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="{{ form.photo.id_for_label }}" class="form-label">Employee Photo</label>
+                            {{ form.photo }}
+                            <div class="form-text">Upload JPG, PNG, or GIF (max 5MB)</div>
                         </div>
                     </div>
                     

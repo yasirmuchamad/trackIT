@@ -29,6 +29,8 @@ urlpatterns = [
     # Onboarding
     path('onboarding/', onboarding_list, name='onboarding_list'),
     path('onboarding/<int:onboarding_id>/resend/', resend_onboarding, name='resend_onboarding'),
+    path('onboarding/<int:employee_id>/regenerate-token/', regenerate_onboarding_token, name='regenerate_onboarding_token'),
+    path('onboarding/<int:employee_id>/extend-expiration/', extend_onboarding_expiration, name='extend_onboarding_expiration'),
 ]
 
 # Public URLs (no login required)

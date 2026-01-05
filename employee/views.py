@@ -11,7 +11,7 @@ import logging
 from employee.forms import EmployeeCreateForm, EmployeeUpdateForm, EmployeeSearchForm
 from employee.models import (
     Employee, EmployeeOnboarding, EmployeeHistory, 
-    EmployeeAddress, EmployeeFamily, EmployeeStudied,
+    EmployeeAddress, EmployeeFamily, EmployeeStudied, EmployeeWorkExperience,
     Unit, Department, Subdepartment, Position
 )
 from employee.services.onboarding_delivery import send_onboarding_links
@@ -101,7 +101,7 @@ def employee_detail(request, employee_id):
 def create_employee(request):
     """Create new employee"""
     if request.method == "POST":
-        form = EmployeeCreateForm(request.POST)
+        form = EmployeeCreateForm(request.POST, request.FILES)
 
         if form.is_valid():
             employee = form.save()
@@ -182,7 +182,7 @@ def update_employee(request, employee_id):
     employee = get_object_or_404(Employee, employee_id=employee_id)
     
     if request.method == "POST":
-        form = EmployeeUpdateForm(request.POST, instance=employee)
+        form = EmployeeUpdateForm(request.POST, request.FILES, instance=employee)
         
         if form.is_valid():
             form.save()
@@ -561,6 +561,9 @@ def process_onboarding_form(request, onboarding):
         # Process Education Information
         process_education_data(request, employee)
         
+        # Process Work Experience Information
+        process_work_experience_data(request, employee)
+        
         # Mark onboarding as completed
         onboarding.is_completed = True
         onboarding.completed_at = timezone.now()
@@ -709,3 +712,160 @@ def process_education_data(request, employee):
                 major=major or '',
                 degree=degree or ''
             )
+
+def process_work_experience_data(request, employee):
+    """Process work experience information from onboarding form"""
+    from employee.models import EmployeeWorkExperience
+    from datetime import datetime
+    
+    # Delete existing work experience data
+    EmployeeWorkExperience.objects.filter(employee=employee).delete()
+    
+    # Process multiple work experience records (max 3)
+    work_experience_count = int(request.POST.get('work_experience_count', 0))
+    
+    for i in range(min(work_experience_count, 3)):  # Limit to 3 experiences
+        company_name = request.POST.get(f'work_company_{i}')
+        position = request.POST.get(f'work_position_{i}')
+        department = request.POST.get(f'work_department_{i}', '')
+        start_date = request.POST.get(f'work_start_date_{i}')
+        end_date = request.POST.get(f'work_end_date_{i}')
+        job_description = request.POST.get(f'work_description_{i}', '')
+        reason_for_leaving = request.POST.get(f'work_reason_{i}', '')
+        salary_range = request.POST.get(f'work_salary_{i}', '')
+        supervisor_name = request.POST.get(f'work_supervisor_{i}', '')
+        supervisor_contact = request.POST.get(f'work_supervisor_contact_{i}', '')
+        
+        if company_name and position and start_date and end_date:
+            try:
+                # Convert date strings to date objects
+                start_dt = datetime.strptime(start_date, '%Y-%m-%d').date()
+                end_dt = datetime.strptime(end_date, '%Y-%m-%d').date()
+                
+                # Validate dates
+                if start_dt >= end_dt:
+                    continue  # Skip invalid date ranges
+                
+                EmployeeWorkExperience.objects.create(
+                    employee=employee,
+                    company_name=company_name,
+                    position=position,
+                    department=department,
+                    start_date=start_dt,
+                    end_date=end_dt,
+                    job_description=job_description,
+                    reason_for_leaving=reason_for_leaving,
+                    salary_range=salary_range,
+                    supervisor_name=supervisor_name,
+                    supervisor_contact=supervisor_contact
+                )
+            except ValueError:
+                # Skip invalid dates
+                continue
+
+@login_required
+@require_http_methods(["POST"])
+def regenerate_onboarding_token(request, employee_id):
+    """Regenerate onboarding token for expired onboarding"""
+    employee = get_object_or_404(Employee, id=employee_id)
+    
+    try:
+        onboarding = employee.onboarding
+        
+        # Check if onboarding exists and is expired
+        if not onboarding.is_expired() and not onboarding.is_completed:
+            messages.warning(request, f"Onboarding link for {employee.name} is still valid until {onboarding.expires_at.strftime('%d %B %Y, %H:%M')}")
+            return redirect('employee:onboarding_list')
+        
+        # Regenerate token and extend expiration
+        old_token = str(onboarding.token)
+        onboarding.regenerate_token(days_valid=7)  # Give 7 days for regenerated token
+        
+        logger.info(f"Onboarding token regenerated for {employee.name}. Old token: {old_token[:8]}..., New token: {str(onboarding.token)[:8]}...")
+        
+        # Send new onboarding links
+        email = employee.private_mail
+        phone = employee.phone
+        
+        if email or phone:
+            results = send_onboarding_links(onboarding, email, phone)
+            
+            success_channels = []
+            failed_channels = []
+            
+            if email and results.get('email'):
+                success_channels.append('email')
+            elif email:
+                failed_channels.append('email')
+                
+            if phone and results.get('whatsapp'):
+                success_channels.append('WhatsApp')
+            elif phone:
+                failed_channels.append('WhatsApp')
+            
+            if success_channels:
+                messages.success(request, f"New onboarding token generated and sent via {', '.join(success_channels)} to {employee.name}")
+            
+            if failed_channels:
+                messages.warning(request, f"Token generated but failed to send via {', '.join(failed_channels)}")
+        else:
+            messages.success(request, f"New onboarding token generated for {employee.name}. Please provide email or phone to send the link.")
+        
+    except EmployeeOnboarding.DoesNotExist:
+        # Create new onboarding if doesn't exist
+        onboarding = EmployeeOnboarding.create_for_employee(employee, days_valid=3)
+        
+        email = employee.private_mail
+        phone = employee.phone
+        
+        if email or phone:
+            results = send_onboarding_links(onboarding, email, phone)
+            
+            success_channels = []
+            if email and results.get('email'):
+                success_channels.append('email')
+            if phone and results.get('whatsapp'):
+                success_channels.append('WhatsApp')
+            
+            if success_channels:
+                messages.success(request, f"New onboarding created and sent via {', '.join(success_channels)} to {employee.name}")
+            else:
+                messages.warning(request, f"Onboarding created for {employee.name} but failed to send notifications")
+        else:
+            messages.success(request, f"New onboarding created for {employee.name}. Please provide email or phone to send the link.")
+    
+    except Exception as e:
+        logger.error(f"Error regenerating onboarding token for {employee.name}: {str(e)}")
+        messages.error(request, f"Failed to regenerate onboarding token: {str(e)}")
+    
+    return redirect('employees:onboarding_list')
+
+
+@login_required
+@require_http_methods(["POST"])
+def extend_onboarding_expiration(request, employee_id):
+    """Extend onboarding expiration without changing token"""
+    employee = get_object_or_404(Employee, id=employee_id)
+    
+    try:
+        onboarding = employee.onboarding
+        
+        if onboarding.is_completed:
+            messages.warning(request, f"Onboarding for {employee.name} is already completed")
+            return redirect('employees:onboarding_list')
+        
+        # Extend expiration by 7 days
+        old_expiry = onboarding.expires_at
+        onboarding.extend_expiration(days_valid=7)
+        
+        logger.info(f"Onboarding expiration extended for {employee.name}. Old: {old_expiry}, New: {onboarding.expires_at}")
+        
+        messages.success(request, f"Onboarding expiration extended for {employee.name} until {onboarding.expires_at.strftime('%d %B %Y, %H:%M')}")
+        
+    except EmployeeOnboarding.DoesNotExist:
+        messages.error(request, f"No onboarding found for {employee.name}")
+    except Exception as e:
+        logger.error(f"Error extending onboarding expiration for {employee.name}: {str(e)}")
+        messages.error(request, f"Failed to extend expiration: {str(e)}")
+    
+    return redirect('employees:onboarding_list')

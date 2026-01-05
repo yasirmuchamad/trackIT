@@ -7,6 +7,13 @@ import uuid
 from datetime import timedelta
 
 
+def validate_image_size(image):
+    """Validate image file size (max 5MB)"""
+    max_size = 5 * 1024 * 1024  # 5MB
+    if image.size > max_size:
+        raise ValidationError('Image file too large. Maximum size is 5MB.')
+
+
 # Create your models here.
 class Unit(models.Model):
     """Model definition for Unit."""
@@ -185,6 +192,15 @@ class Employee(models.Model):
                                            )
     private_mail        = models.EmailField(null=True, blank=True)
     company_mail        = models.EmailField(null=True, blank=True)
+    
+    # Employee photo
+    photo               = models.ImageField(
+                            upload_to='employee_photos/',
+                            null=True,
+                            blank=True,
+                            validators=[validate_image_size],
+                            help_text="Upload employee photo (JPG, PNG, max 5MB)"
+                        )
 
     is_active           = models.BooleanField(default=True)
     last_working_date   = models.DateField(null=True, blank=True)
@@ -269,6 +285,23 @@ class Employee(models.Model):
     def has_emergency_contact(self):
         """Check if employee has at least one emergency contact"""
         return self.families.filter(is_emergency_contact=True).exists()
+    
+    def get_work_experiences(self):
+        """Get all work experiences for this employee, ordered by most recent"""
+        return self.work_experiences.all()
+    
+    def get_work_experiences_count(self):
+        """Get count of work experiences"""
+        return self.work_experiences.count()
+    
+    def can_add_work_experience(self):
+        """Check if employee can add more work experience (max 3)"""
+        return self.get_work_experiences_count() < 3
+    
+    def get_total_work_experience_years(self):
+        """Calculate total years of work experience"""
+        total_months = sum(exp.duration_months for exp in self.work_experiences.all())
+        return round(total_months / 12, 1) if total_months > 0 else 0
         
 
 
@@ -472,12 +505,40 @@ class EmployeeOnboarding(models.Model):
     def is_expired(self):
         return timezone.now() > self.expires_at
     
+    def regenerate_token(self, days_valid=3):
+        """Regenerate token and extend expiration for expired onboarding"""
+        self.token = uuid.uuid4()
+        self.expires_at = timezone.now() + timedelta(days=days_valid)
+        self.is_completed = False  # Reset completion status
+        self.completed_at = None
+        self.save()
+        return self
+    
+    def extend_expiration(self, days_valid=3):
+        """Extend expiration without changing token"""
+        self.expires_at = timezone.now() + timedelta(days=days_valid)
+        self.save()
+        return self
+    
     @classmethod
     def create_for_employee(cls, employee, days_valid=3):
         return cls.objects.create(
             employee=employee,
-            expires_at=timezone.now() + timedelta(days_valid)
+            expires_at=timezone.now() + timedelta(days=days_valid)
         )
+    
+    @classmethod
+    def get_or_create_for_employee(cls, employee, days_valid=3):
+        """Get existing onboarding or create new one if not exists or completed"""
+        try:
+            onboarding = cls.objects.get(employee=employee)
+            if onboarding.is_completed:
+                # If completed, create new onboarding (for re-onboarding scenarios)
+                onboarding.delete()
+                return cls.create_for_employee(employee, days_valid), True
+            return onboarding, False
+        except cls.DoesNotExist:
+            return cls.create_for_employee(employee, days_valid), True
     
     def __str__(self):
         return f"(self.employee.name) onboarding"
@@ -503,3 +564,133 @@ class OnboardingDelivery(models.Model):
     
     def __str__(self):
         return f"{self.channel} -> {self.destination} "
+
+
+class EmployeeWorkExperience(models.Model):
+    """Model definition for Employee Work Experience."""
+    
+    employee = models.ForeignKey(
+        Employee,
+        on_delete=models.CASCADE,
+        related_name='work_experiences'
+    )
+    
+    company_name = models.CharField(
+        max_length=100,
+        help_text="Nama perusahaan tempat bekerja sebelumnya"
+    )
+    
+    position = models.CharField(
+        max_length=100,
+        help_text="Posisi/jabatan di perusahaan tersebut"
+    )
+    
+    department = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True,
+        help_text="Departemen/divisi tempat bekerja"
+    )
+    
+    start_date = models.DateField(
+        help_text="Tanggal mulai bekerja"
+    )
+    
+    end_date = models.DateField(
+        help_text="Tanggal selesai bekerja"
+    )
+    
+    job_description = models.TextField(
+        null=True,
+        blank=True,
+        help_text="Deskripsi pekerjaan dan tanggung jawab"
+    )
+    
+    reason_for_leaving = models.CharField(
+        max_length=200,
+        null=True,
+        blank=True,
+        help_text="Alasan meninggalkan pekerjaan"
+    )
+    
+    salary_range = models.CharField(
+        max_length=50,
+        null=True,
+        blank=True,
+        help_text="Range gaji (opsional)"
+    )
+    
+    supervisor_name = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True,
+        help_text="Nama atasan langsung"
+    )
+    
+    supervisor_contact = models.CharField(
+        max_length=50,
+        null=True,
+        blank=True,
+        help_text="Kontak atasan (email/telepon)"
+    )
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = 'Employee Work Experience'
+        verbose_name_plural = 'Employee Work Experiences'
+        ordering = ['-end_date', '-start_date']  # Urutkan dari yang terbaru
+        
+        # Constraint untuk maksimal 3 pengalaman kerja per employee
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(start_date__lt=models.F('end_date')),
+                name='work_experience_start_before_end'
+            )
+        ]
+    
+    def clean(self):
+        """Validasi custom untuk model"""
+        super().clean()
+        
+        # Validasi tanggal
+        if self.start_date and self.end_date:
+            if self.start_date >= self.end_date:
+                raise ValidationError({
+                    'end_date': 'Tanggal selesai harus setelah tanggal mulai'
+                })
+        
+        # Validasi maksimal 3 pengalaman kerja per employee
+        if self.employee_id:
+            existing_count = EmployeeWorkExperience.objects.filter(
+                employee=self.employee
+            ).exclude(pk=self.pk).count()
+            
+            if existing_count >= 3:
+                raise ValidationError(
+                    'Maksimal hanya 3 pengalaman kerja yang dapat disimpan per employee'
+                )
+    
+    def save(self, *args, **kwargs):
+        """Override save untuk validasi tambahan"""
+        self.full_clean()
+        super().save(*args, **kwargs)
+    
+    @property
+    def duration_months(self):
+        """Menghitung durasi kerja dalam bulan"""
+        if self.start_date and self.end_date:
+            delta = self.end_date - self.start_date
+            return round(delta.days / 30.44)  # Rata-rata hari per bulan
+        return 0
+    
+    @property
+    def duration_years(self):
+        """Menghitung durasi kerja dalam tahun"""
+        months = self.duration_months
+        return round(months / 12, 1) if months > 0 else 0
+    
+    def __str__(self):
+        """Unicode representation of EmployeeWorkExperience."""
+        return f"{self.employee.name} - {self.position} at {self.company_name}"

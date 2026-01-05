@@ -1,0 +1,100 @@
+<!-- Work Experience Display Template -->
+<div class="work-experience-display">
+    <h5 class="mb-3">
+        <i class="fas fa-briefcase me-2"></i>
+        Pengalaman Kerja
+        {% if work_experiences %}
+            <span class="badge bg-primary ms-2">{{ work_experiences|length }}</span>
+        {% endif %}
+    </h5>
+    
+    {% if work_experiences %}
+        <div class="row">
+            {% for experience in work_experiences %}
+                <div class="col-md-6 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h6 class="card-title mb-1">
+                                    <i class="fas fa-building text-primary me-2"></i>
+                                    {{ experience.company_name }}
+                                </h6>
+                                <small class="text-muted">
+                                    {{ experience.duration_years }} tahun
+                                </small>
+                            </div>
+                            
+                            <p class="card-text mb-2">
+                                <strong>{{ experience.position }}</strong>
+                                {% if experience.department %}
+                                    <br><small class="text-muted">{{ experience.department }}</small>
+                                {% endif %}
+                            </p>
+                            
+                            <div class="mb-2">
+                                <small class="text-muted">
+                                    <i class="fas fa-calendar me-1"></i>
+                                    {{ experience.start_date|date:"M Y" }} - {{ experience.end_date|date:"M Y" }}
+                                </small>
+                            </div>
+                            
+                            {% if experience.job_description %}
+                                <div class="mb-2">
+                                    <small class="text-muted">
+                                        <strong>Deskripsi:</strong><br>
+                                        {{ experience.job_description|truncatewords:20 }}
+                                    </small>
+                                </div>
+                            {% endif %}
+                            
+                            {% if experience.reason_for_leaving %}
+                                <div class="mb-2">
+                                    <small class="text-muted">
+                                        <strong>Alasan keluar:</strong> {{ experience.reason_for_leaving }}
+                                    </small>
+                                </div>
+                            {% endif %}
+                            
+                            {% if experience.supervisor_name %}
+                                <div class="mb-2">
+                                    <small class="text-muted">
+                                        <strong>Atasan:</strong> {{ experience.supervisor_name }}
+                                        {% if experience.supervisor_contact %}
+                                            <br>{{ experience.supervisor_contact }}
+                                        {% endif %}
+                                    </small>
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="card-footer bg-light">
+                            <small class="text-muted">
+                                <i class="fas fa-clock me-1"></i>
+                                Ditambahkan {{ experience.created_at|date:"d M Y" }}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Summary -->
+        <div class="alert alert-info mt-3">
+            <div class="row">
+                <div class="col-md-6">
+                    <strong>Total Pengalaman Kerja:</strong> {{ employee.get_total_work_experience_years }} tahun
+                </div>
+                <div class="col-md-6">
+                    <strong>Jumlah Perusahaan:</strong> {{ work_experiences|length }} perusahaan
+                </div>
+            </div>
+        </div>
+        
+    {% else %}
+        <div class="alert alert-light text-center">
+            <i class="fas fa-briefcase fa-2x text-muted mb-2"></i>
+            <p class="mb-0">Belum ada data pengalaman kerja</p>
+            <small class="text-muted">Pengalaman kerja akan ditambahkan melalui proses onboarding</small>
+        </div>
+    {% endif %}
+</div>

@@ -1,0 +1,278 @@
+<!-- Work Experience Form Template -->
+<div class="work-experience-section">
+    <h5 class="mb-3">
+        <i class="fas fa-briefcase me-2"></i>
+        Pengalaman Kerja
+        <small class="text-muted">(Maksimal 3 perusahaan terakhir)</small>
+    </h5>
+    
+    <div id="work-experience-forms">
+        {{ work_experience_formset.management_form }}
+        
+        {% for form in work_experience_formset %}
+            <div class="work-experience-form border rounded p-3 mb-3" data-form-index="{{ forloop.counter0 }}">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="mb-0">
+                        <i class="fas fa-building me-2"></i>
+                        Pengalaman Kerja #{{ forloop.counter }}
+                    </h6>
+                    {% if not forloop.first %}
+                        <button type="button" class="btn btn-sm btn-outline-danger remove-work-experience">
+                            <i class="fas fa-trash"></i> Hapus
+                        </button>
+                    {% endif %}
+                </div>
+                
+                <!-- Hidden fields -->
+                {% for hidden in form.hidden_fields %}
+                    {{ hidden }}
+                {% endfor %}
+                
+                <div class="row">
+                    <!-- Company Name -->
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.company_name.id_for_label }}" class="form-label">
+                            Nama Perusahaan <span class="text-danger">*</span>
+                        </label>
+                        {{ form.company_name }}
+                        {% if form.company_name.errors %}
+                            <div class="text-danger small">{{ form.company_name.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Position -->
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.position.id_for_label }}" class="form-label">
+                            Posisi/Jabatan <span class="text-danger">*</span>
+                        </label>
+                        {{ form.position }}
+                        {% if form.position.errors %}
+                            <div class="text-danger small">{{ form.position.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Department -->
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.department.id_for_label }}" class="form-label">
+                            Departemen/Divisi
+                        </label>
+                        {{ form.department }}
+                        {% if form.department.errors %}
+                            <div class="text-danger small">{{ form.department.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Date Range -->
+                    <div class="col-md-3 mb-3">
+                        <label for="{{ form.start_date.id_for_label }}" class="form-label">
+                            Tanggal Mulai <span class="text-danger">*</span>
+                        </label>
+                        {{ form.start_date }}
+                        {% if form.start_date.errors %}
+                            <div class="text-danger small">{{ form.start_date.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="col-md-3 mb-3">
+                        <label for="{{ form.end_date.id_for_label }}" class="form-label">
+                            Tanggal Selesai <span class="text-danger">*</span>
+                        </label>
+                        {{ form.end_date }}
+                        {% if form.end_date.errors %}
+                            <div class="text-danger small">{{ form.end_date.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Job Description -->
+                    <div class="col-12 mb-3">
+                        <label for="{{ form.job_description.id_for_label }}" class="form-label">
+                            Deskripsi Pekerjaan
+                        </label>
+                        {{ form.job_description }}
+                        {% if form.job_description.errors %}
+                            <div class="text-danger small">{{ form.job_description.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Reason for Leaving -->
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.reason_for_leaving.id_for_label }}" class="form-label">
+                            Alasan Meninggalkan Pekerjaan
+                        </label>
+                        {{ form.reason_for_leaving }}
+                        {% if form.reason_for_leaving.errors %}
+                            <div class="text-danger small">{{ form.reason_for_leaving.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Salary Range -->
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.salary_range.id_for_label }}" class="form-label">
+                            Range Gaji
+                        </label>
+                        {{ form.salary_range }}
+                        {% if form.salary_range.errors %}
+                            <div class="text-danger small">{{ form.salary_range.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Supervisor Info -->
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.supervisor_name.id_for_label }}" class="form-label">
+                            Nama Atasan Langsung
+                        </label>
+                        {{ form.supervisor_name }}
+                        {% if form.supervisor_name.errors %}
+                            <div class="text-danger small">{{ form.supervisor_name.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.supervisor_contact.id_for_label }}" class="form-label">
+                            Kontak Atasan
+                        </label>
+                        {{ form.supervisor_contact }}
+                        {% if form.supervisor_contact.errors %}
+                            <div class="text-danger small">{{ form.supervisor_contact.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Delete checkbox (hidden by default) -->
+                {% if form.DELETE %}
+                    <div class="form-check d-none">
+                        {{ form.DELETE }}
+                        <label for="{{ form.DELETE.id_for_label }}">Delete</label>
+                    </div>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Add More Button -->
+    <div class="text-center mb-3">
+        <button type="button" id="add-work-experience" class="btn btn-outline-primary">
+            <i class="fas fa-plus me-2"></i>
+            Tambah Pengalaman Kerja
+        </button>
+        <small class="d-block text-muted mt-1">
+            Maksimal 3 pengalaman kerja dapat ditambahkan
+        </small>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const addButton = document.getElementById('add-work-experience');
+    const formsContainer = document.getElementById('work-experience-forms');
+    const totalFormsInput = document.querySelector('#id_form-TOTAL_FORMS');
+    
+    // Update form count and visibility
+    function updateFormCount() {
+        const visibleForms = document.querySelectorAll('.work-experience-form:not([style*="display: none"])');
+        const count = visibleForms.length;
+        
+        // Show/hide add button based on count
+        if (count >= 3) {
+            addButton.style.display = 'none';
+        } else {
+            addButton.style.display = 'block';
+        }
+        
+        // Update form numbers
+        visibleForms.forEach((form, index) => {
+            const title = form.querySelector('h6');
+            if (title) {
+                title.innerHTML = `<i class="fas fa-building me-2"></i>Pengalaman Kerja #${index + 1}`;
+            }
+        });
+    }
+    
+    // Add new work experience form
+    addButton.addEventListener('click', function() {
+        const currentFormCount = parseInt(totalFormsInput.value);
+        if (currentFormCount >= 3) return;
+        
+        // Clone the last form
+        const lastForm = document.querySelector('.work-experience-form:last-of-type');
+        const newForm = lastForm.cloneNode(true);
+        
+        // Update form index
+        const newIndex = currentFormCount;
+        newForm.setAttribute('data-form-index', newIndex);
+        
+        // Update field names and IDs
+        const fields = newForm.querySelectorAll('input, textarea, select');
+        fields.forEach(field => {
+            const name = field.getAttribute('name');
+            const id = field.getAttribute('id');
+            
+            if (name) {
+                field.setAttribute('name', name.replace(/form-\d+/, `form-${newIndex}`));
+            }
+            if (id) {
+                field.setAttribute('id', id.replace(/form-\d+/, `form-${newIndex}`));
+            }
+            
+            // Clear values
+            if (field.type !== 'hidden') {
+                field.value = '';
+            }
+        });
+        
+        // Update labels
+        const labels = newForm.querySelectorAll('label');
+        labels.forEach(label => {
+            const forAttr = label.getAttribute('for');
+            if (forAttr) {
+                label.setAttribute('for', forAttr.replace(/form-\d+/, `form-${newIndex}`));
+            }
+        });
+        
+        // Add remove button if not exists
+        const removeBtn = newForm.querySelector('.remove-work-experience');
+        if (!removeBtn) {
+            const header = newForm.querySelector('.d-flex');
+            const newRemoveBtn = document.createElement('button');
+            newRemoveBtn.type = 'button';
+            newRemoveBtn.className = 'btn btn-sm btn-outline-danger remove-work-experience';
+            newRemoveBtn.innerHTML = '<i class="fas fa-trash"></i> Hapus';
+            header.appendChild(newRemoveBtn);
+        }
+        
+        // Append new form
+        formsContainer.appendChild(newForm);
+        
+        // Update total forms count
+        totalFormsInput.value = currentFormCount + 1;
+        
+        updateFormCount();
+    });
+    
+    // Remove work experience form
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.remove-work-experience')) {
+            const form = e.target.closest('.work-experience-form');
+            const deleteCheckbox = form.querySelector('input[name$="-DELETE"]');
+            
+            if (deleteCheckbox) {
+                // Mark for deletion
+                deleteCheckbox.checked = true;
+                form.style.display = 'none';
+            } else {
+                // Remove from DOM
+                form.remove();
+                
+                // Update total forms count
+                const currentCount = parseInt(totalFormsInput.value);
+                totalFormsInput.value = currentCount - 1;
+            }
+            
+            updateFormCount();
+        }
+    });
+    
+    // Initial update
+    updateFormCount();
+});
+</script>

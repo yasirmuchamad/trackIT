@@ -19,6 +19,11 @@ def send_onboarding_email(onboarding, email):
     link = build_onboarding_link(onboarding.token)
     employee = onboarding.employee
     
+    logger.info(f"Attempting to send onboarding email to {email} for {employee.name}")
+    logger.info(f"Using email backend: {settings.EMAIL_BACKEND}")
+    logger.info(f"SMTP host: {settings.EMAIL_HOST}:{settings.EMAIL_PORT}")
+    logger.info(f"From email: {settings.DEFAULT_FROM_EMAIL}")
+    
     try:
         # Create HTML email content
         html_message = render_to_string('employee/emails/onboarding.html', {
@@ -30,10 +35,12 @@ def send_onboarding_email(onboarding, email):
         # Create plain text version
         plain_message = strip_tags(html_message)
         
+        logger.info("Email content prepared, attempting to send...")
+        
         send_mail(
             subject=f"Welcome to the Team - Complete Your Onboarding ({employee.name})",
             message=plain_message,
-            from_email=getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@company.com'),
+            from_email=getattr(settings, 'DEFAULT_FROM_EMAIL', ''),
             recipient_list=[email],
             html_message=html_message,
             fail_silently=False,
@@ -59,10 +66,25 @@ def send_onboarding_email(onboarding, email):
         )
         
         logger.error(f"Failed to send onboarding email to {email}: {str(e)}")
+        logger.error(f"Exception type: {type(e).__name__}")
+        
+        # Additional debugging for common email issues
+        if "Connection unexpectedly closed" in str(e):
+            logger.error("→ This usually indicates SMTP server connection issues")
+            logger.error("→ Check if SMTP server is accessible and credentials are correct")
+            logger.error("→ Try using port 465 with SSL instead of 587 with TLS")
+        elif "Authentication failed" in str(e):
+            logger.error("→ Email credentials are incorrect")
+        elif "timeout" in str(e).lower():
+            logger.error("→ SMTP server is not responding (timeout)")
+            
         return False
 
 def send_onboarding_whatsapp(onboarding, phone):
     """Send onboarding link via WhatsApp"""
+    print(f"🚨 DEBUG: send_onboarding_whatsapp CALLED!")
+    print(f"🚨 DEBUG: employee={onboarding.employee.name}, phone={phone}")
+    
     logger.info(f"send_onboarding_whatsapp called with phone: {phone}")
     
     link = build_onboarding_link(onboarding.token)
@@ -75,6 +97,7 @@ def send_onboarding_whatsapp(onboarding, phone):
     elif not clean_phone.startswith('62'):
         clean_phone = '62' + clean_phone
     
+    print(f"🚨 DEBUG: clean_phone={clean_phone}")
     logger.info(f"Phone formatted: {phone} → {clean_phone}")
     
     message = f"""Halo {employee.name}! 👋
@@ -91,6 +114,7 @@ Jika ada pertanyaan, silakan hubungi HR.
 Terima kasih! 🙏
     """.strip()
     
+    print(f"🚨 DEBUG: message prepared, length={len(message)}")
     logger.info(f"Message prepared for {employee.name}")
     
     try:
@@ -110,28 +134,10 @@ Terima kasih! 🙏
             )
             return True
         
-        print(f"🚨 DEBUG: About to call send_via_fonnte")
-        
-        # Method 1: Using WhatsApp Business API (if configured)
-        if hasattr(settings, 'WHATSAPP_API_URL') and hasattr(settings, 'WHATSAPP_API_TOKEN'):
-            print("🚨 DEBUG: Using WhatsApp Business API")
-            success = send_via_whatsapp_api(clean_phone, message)
-        
-        # Method 2: Using third-party service like Fonnte, Wablas, etc.
-        elif whatsapp_url and whatsapp_token:
-            print("🚨 DEBUG: Using third-party service (Fonnte)")
-            success = send_via_whatsapp_service(clean_phone, message)
-        
-        # Method 3: Fallback - just log (for development)
-        else:
-            print("🚨 DEBUG: Using fallback logging")
-            logger.info(f"[WhatsApp] Would send to {clean_phone}: {message}")
-            success = True  # Assume success for development
-        
-        print(f"🚨 DEBUG: WhatsApp service returned: {success}")
+        # Call Fonnte directly
+        success = send_via_fonnte(clean_phone, message)
         
         if success:
-            print("🚨 DEBUG: Creating OnboardingDelivery record (SUCCESS)")
             OnboardingDelivery.objects.create(
                 onboarding=onboarding,
                 channel="whatsapp",
@@ -221,9 +227,15 @@ def send_via_whatsapp_service(phone, message):
 def send_via_fonnte(phone, message):
     """Send via Fonnte.com service"""
     try:
+        print(f"🚨 DEBUG: send_via_fonnte CALLED!")
+        print(f"🚨 DEBUG: phone={phone}, message={message[:50]}...")
+        
         # Get settings - NO fallback to dummy token
         url = getattr(settings, 'WHATSAPP_SERVICE_URL', 'https://api.fonnte.com/send')
         token = getattr(settings, 'WHATSAPP_SERVICE_TOKEN', '')  # Empty default
+        
+        print(f"🚨 DEBUG: url={url}")
+        print(f"🚨 DEBUG: token={token[:10]}...")
         
         logger.info(f"Fonnte URL from settings: {url}")
         logger.info(f"Fonnte token from settings: {token[:10]}..." if token else "Fonnte token: EMPTY")
@@ -244,12 +256,20 @@ def send_via_fonnte(phone, message):
             'countryCode': '62',  # Indonesia
         }
         
+        print(f"🚨 DEBUG: About to call requests.post")
+        print(f"🚨 DEBUG: headers={{'Authorization': '{token[:10]}...'}}")
+        print(f"🚨 DEBUG: data={data}")
+        
         logger.info(f"Sending WhatsApp via Fonnte to {phone}")
         logger.info(f"Request URL: {url}")
         logger.info(f"Request headers: Authorization: {token[:10]}...")
         logger.info(f"Request data: {data}")
         
         response = requests.post(url, data=data, headers=headers)
+        
+        print(f"🚨 DEBUG: requests.post completed!")
+        print(f"🚨 DEBUG: response.status_code={response.status_code}")
+        print(f"🚨 DEBUG: response.text={response.text}")
         
         logger.info(f"Fonnte response status: {response.status_code}")
         logger.info(f"Fonnte response headers: {dict(response.headers)}")
