@@ -1,74 +1,320 @@
 {% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
 {% block content %}
-    
-    <script>
-        $(document).ready(function () {
-            let timer;
-            $('#filter-input').on('keyup', function () {
-                clearTimeout(timer);
-                timer = setTimeout(() => {
-                    var value = $(this).val().toLowerCase();
-                    $('table tbody tr').filter(function () {
-                        $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
-                    });
-                }, 150); // 150ms delay
-            });
-        });
-    </script>
-    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-        <h1 class="h2">{{ title }}</h1>
-        <div class="btn-toolbar mb-2 mb-md-0">
-          <div class="btn-group md-2">
-            <a href="{% url 'inventory:item_to_excel' %}" class="btn btn-sm btn-secondary ex-tbl d-flex align-items-center justify-content-center mr-2"><ion-icon name="newspaper-outline"></ion-icon>Export</a>
-            <!-- <button type="button" class="btn btn-sm btn-secondary ex-tbl d-flex align-items-center justify-content-center mr-2"> <ion-icon name="newspaper-outline"></ion-icon>Export</button> -->
-            <button type="button" class="btn btn-sm btn-secondary ex-tbl d-flex align-items-center justify-content-center mr-2" onclick="printSection()" ><ion-icon name="print-outline"></ion-icon>Print</button>
-          </div>
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-light">
+            <ion-icon name="list-outline" class="me-2"></ion-icon> {{ title }}
+        </h1>
+        <div class="btn-group" role="group">
+            <a href="{% url 'inventory:create_item' %}" class="btn btn-primary btn-sm">
+                <ion-icon name="add-outline" class="me-1"></ion-icon> Add Item
+            </a>
+            <a href="{% url 'inventory:item_to_excel' %}" class="btn btn-secondary btn-sm">
+                <ion-icon name="document-outline" class="me-1"></ion-icon> Export
+            </a>
         </div>
     </div>
-    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom"">
-        <a href="{% url 'inventory:create_item' %}" class="btn btn-sm btn-primary ex-tbl d-flex align-items-center justify-content-center mr-4"><ion-icon name="duplicate-outline"></ion-icon>Add</a>
-        <input type="text" id="filter-input" class="form-control d-flex align-items-center justify-content-center mr-2" placeholder="Search">
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        {% if migration_needed %}
+        <div class="col-12 mb-3">
+            <div class="alert alert-warning" role="alert">
+                <h6 class="alert-heading">
+                    <ion-icon name="warning-outline" class="me-2"></ion-icon>
+                    Migration Required
+                </h6>
+                <p class="mb-2">The Asset/Non-Asset feature requires database migration. Please run:</p>
+                <code>python manage.py migrate inventory</code>
+                <hr>
+                <p class="mb-0">After migration, you'll be able to create and manage Asset and Non-Asset items separately.</p>
+            </div>
+        </div>
+        {% endif %}
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <ion-icon name="list-outline" class="text-info" style="font-size: 2rem;"></ion-icon>
+                        </div>
+                        <div>
+                            <div class="text-xs fw-bold text-info text-uppercase mb-1">Total Items</div>
+                            <div class="h5 mb-0 fw-bold text-light">{{ items|length }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <ion-icon name="hardware-chip-outline" class="text-primary" style="font-size: 2rem;"></ion-icon>
+                        </div>
+                        <div>
+                            <div class="text-xs fw-bold text-primary text-uppercase mb-1">Assets</div>
+                            <div class="h5 mb-0 fw-bold text-light">
+                                {% if migration_needed %}
+                                    <small class="text-muted">Migration needed</small>
+                                {% else %}
+                                    {{ asset_count }}
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <ion-icon name="cube-outline" class="text-success" style="font-size: 2rem;"></ion-icon>
+                        </div>
+                        <div>
+                            <div class="text-xs fw-bold text-success text-uppercase mb-1">Non-Assets</div>
+                            <div class="h5 mb-0 fw-bold text-light">
+                                {% if migration_needed %}
+                                    <small class="text-muted">Migration needed</small>
+                                {% else %}
+                                    {{ non_asset_count }}
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="table-responsive tbl-mt">
-        <table class="table table-striped table-sm">
-            <thead>
-                <tr>
-                    <th id="number">No</th>
-                    <th>SKU</th>
-                    <th>Category</th>
-                    <th>Item Name</th>
-                    <th>Brand</th>
-                    <th>Model</th>
-                    <th>CPU</th>
-                    <th>Ram</th>
-                    <th>Storage</th>
-                    <th>Display</th>
-                    <th>OS</th>
-                    <th class="text-center">Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for i in object_list %}
-                <tr>
-                    <td>{{ forloop.counter }}</td>
-                    <td>{{ i.sku_code }}</td>
-                    <td>{{ i.category }}</td>
-                    <td>{{ i.name }}</td>
-                    <td>{{ i.brand }}</td>
-                    <td>{{ i.model }}</td>
-                    <td>{{ i.cpu }}</td>
-                    <td>{{ i.ram }}</td>
-                    <td>{{ i.storage }}</td>
-                    <td>{{ i.display }}</td>
-                    <td>{{ i.os }}</td>
-                    <td class="d-flex align-items-center justify-content-center">
-                        <a href="{% url 'inventory:update_item' i.id %}" class="btn btn-xs btn-outline-warning d-flex align-items-center justify-content-center mr-1"><ion-icon name="create-outline"></ion-icon>Update</a> | 
-                        <a href="{% url 'inventory:delete_item' i.id %}" class="btn btn-xs btn-outline-danger d-flex align-items-center justify-content-center mr-1 text-center"><ion-icon name="trash-outline"></ion-icon>Delete</a>
-                    </td>
-                </tr>
-                {% endfor %}    
-            </tbody>
-        </table>
+
+    <!-- Filter and Search -->
+    {% if not migration_needed %}
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Filter by Type</label>
+                    <select name="type" class="form-select" onchange="this.form.submit()">
+                        <option value="all" {% if current_filter == 'all' %}selected{% endif %}>All Items</option>
+                        <option value="asset" {% if current_filter == 'asset' %}selected{% endif %}>Assets Only</option>
+                        <option value="non_asset" {% if current_filter == 'non_asset' %}selected{% endif %}>Non-Assets Only</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Search</label>
+                    <input type="text" name="search" class="form-control" placeholder="Search by name, SKU, brand, or model..." value="{{ search_query }}">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">&nbsp;</label>
+                    <button type="submit" class="btn btn-primary d-block">
+                        <ion-icon name="search-outline"></ion-icon> Search
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
-   
-{% endblock content %}
+    {% else %}
+    <!-- Simple search when migration is needed -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-10">
+                    <label class="form-label">Search</label>
+                    <input type="text" name="search" class="form-control" placeholder="Search by name, SKU, brand, or model..." value="{{ search_query }}">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">&nbsp;</label>
+                    <button type="submit" class="btn btn-primary d-block">
+                        <ion-icon name="search-outline"></ion-icon> Search
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Quick Links -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="btn-group" role="group">
+                {% if not migration_needed %}
+                <a href="{% url 'inventory:list_asset_item' %}" class="btn btn-outline-primary">
+                    <ion-icon name="hardware-chip-outline" class="me-1"></ion-icon> View Assets
+                </a>
+                <a href="{% url 'inventory:list_non_asset_item' %}" class="btn btn-outline-success">
+                    <ion-icon name="cube-outline" class="me-1"></ion-icon> View Non-Assets
+                </a>
+                <a href="{% url 'inventory:create_asset_item' %}" class="btn btn-outline-primary">
+                    <ion-icon name="add-outline" class="me-1"></ion-icon> Add Asset
+                </a>
+                <a href="{% url 'inventory:create_non_asset_item' %}" class="btn btn-outline-success">
+                    <ion-icon name="add-outline" class="me-1"></ion-icon> Add Non-Asset
+                </a>
+                {% else %}
+                <a href="{% url 'inventory:create_item' %}" class="btn btn-outline-primary">
+                    <ion-icon name="add-outline" class="me-1"></ion-icon> Add Item (Legacy)
+                </a>
+                <span class="btn btn-outline-secondary disabled">
+                    <ion-icon name="warning-outline" class="me-1"></ion-icon> Asset/Non-Asset features require migration
+                </span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Items Table -->
+    <div class="card">
+        <div class="card-header py-3">
+            <h6 class="m-0 fw-bold text-primary">
+                Items List
+                {% if current_filter != 'all' %}
+                    - {{ current_filter|title }} Only
+                {% endif %}
+            </h6>
+        </div>
+        <div class="card-body">
+            {% if items %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Type</th>
+                            <th>SKU Code</th>
+                            <th>Name</th>
+                            <th>Category</th>
+                            <th>Brand</th>
+                            <th>Model</th>
+                            <th>Details</th>
+                            <th>Entry Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in items %}
+                        <tr>
+                            <td>
+                                {% if not migration_needed %}
+                                    <span class="badge bg-primary">
+                                        <ion-icon name="hardware-chip-outline" class="me-1"></ion-icon>
+                                        Asset
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-secondary">
+                                        <ion-icon name="help-outline" class="me-1"></ion-icon>
+                                        Legacy
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td><code>{{ item.sku_code }}</code></td>
+                            <td>
+                                <div class="fw-bold">{{ item.name }}</div>
+                            </td>
+                            <td>{{ item.category.name }}</td>
+                            <td>{{ item.brand|default:"-" }}</td>
+                            <td>{{ item.model|default:"-" }}</td>
+                            <td>
+                                <small class="text-muted">
+                                    {% if not migration_needed %}
+                                        <!-- After migration, we can show type-specific details -->
+                                        {% if item.cpu %}CPU: {{ item.cpu }}<br>{% endif %}
+                                        {% if item.ram %}RAM: {{ item.ram }}<br>{% endif %}
+                                        {% if item.storage %}Storage: {{ item.storage }}{% endif %}
+                                    {% else %}
+                                        <!-- Before migration, show basic specs only -->
+                                        {% if item.cpu %}CPU: {{ item.cpu }}<br>{% endif %}
+                                        {% if item.ram %}RAM: {{ item.ram }}<br>{% endif %}
+                                        {% if item.storage %}Storage: {{ item.storage }}{% endif %}
+                                    {% endif %}
+                                </small>
+                            </td>
+                            <td>{{ item.entry_date|date:"d M Y" }}</td>
+                            <td>
+                                <div class="btn-group btn-group-sm" role="group">
+                                    {% if not migration_needed %}
+                                        <!-- After migration, use specialized update links -->
+                                        <a href="{% url 'inventory:update_item' item.pk %}" class="btn btn-outline-primary btn-sm">
+                                            <ion-icon name="create-outline"></ion-icon>
+                                        </a>
+                                    {% else %}
+                                        <!-- Before migration, use legacy update link -->
+                                        <a href="{% url 'inventory:update_item' item.pk %}" class="btn btn-outline-secondary btn-sm">
+                                            <ion-icon name="create-outline"></ion-icon>
+                                        </a>
+                                    {% endif %}
+                                    <a href="{% url 'inventory:delete_item' item.pk %}" class="btn btn-outline-danger btn-sm"
+                                       onclick="return confirm('Delete this item?')">
+                                        <ion-icon name="trash-outline"></ion-icon>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if is_paginated %}
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if current_filter != 'all' %}&type={{ current_filter }}{% endif %}">First</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if current_filter != 'all' %}&type={{ current_filter }}{% endif %}">Previous</a>
+                        </li>
+                    {% endif %}
+
+                    <li class="page-item active">
+                        <span class="page-link">
+                            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                        </span>
+                    </li>
+
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if current_filter != 'all' %}&type={{ current_filter }}{% endif %}">Next</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if current_filter != 'all' %}&type={{ current_filter }}{% endif %}">Last</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+
+            {% else %}
+            <div class="text-center py-5">
+                <ion-icon name="list-outline" class="text-muted" style="font-size: 4rem;"></ion-icon>
+                <h5 class="text-muted mt-3">No Items Found</h5>
+                <p class="text-muted">
+                    {% if search_query %}
+                        No items match your search criteria.
+                    {% else %}
+                        Start by creating your first item.
+                    {% endif %}
+                </p>
+                <div class="mt-3">
+                    <a href="{% url 'inventory:create_asset_item' %}" class="btn btn-primary me-2">
+                        <ion-icon name="hardware-chip-outline" class="me-1"></ion-icon> Create Asset
+                    </a>
+                    <a href="{% url 'inventory:create_non_asset_item' %}" class="btn btn-success">
+                        <ion-icon name="cube-outline" class="me-1"></ion-icon> Create Non-Asset
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

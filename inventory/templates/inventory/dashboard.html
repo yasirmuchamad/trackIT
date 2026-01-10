@@ -1,0 +1,357 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-light">
+            <ion-icon name="stats-chart-outline" class="me-2"></ion-icon> Inventory Dashboard
+        </h1>
+        <div class="btn-group" role="group">
+            <a href="{% url 'inventory:create_item' %}" class="btn btn-primary btn-sm">
+                <ion-icon name="add-outline" class="me-1"></ion-icon> Add Item
+            </a>
+            <a href="{% url 'inventory:create_item_unit' %}" class="btn btn-success btn-sm">
+                <ion-icon name="add-outline" class="me-1"></ion-icon> Add Device
+            </a>
+        </div>
+    </div>
+
+    <!-- Statistics Cards Row -->
+    <div class="row mb-4">
+        <!-- Total Categories Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col me-2">
+                            <div class="text-xs fw-bold text-primary text-uppercase mb-1">
+                                Total Categories
+                            </div>
+                            <div class="h5 mb-0 fw-bold text-light">{{ total_categories }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <ion-icon name="pricetags-outline" class="text-muted" style="font-size: 2rem;"></ion-icon>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Items Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col me-2">
+                            <div class="text-xs fw-bold text-success text-uppercase mb-1">
+                                Total Items
+                            </div>
+                            <div class="h5 mb-0 fw-bold text-light">{{ total_items }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <ion-icon name="cube-outline" class="text-muted" style="font-size: 2rem;"></ion-icon>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Devices Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col me-2">
+                            <div class="text-xs fw-bold text-info text-uppercase mb-1">
+                                Total Devices
+                            </div>
+                            <div class="h5 mb-0 fw-bold text-light">{{ total_item_units }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <ion-icon name="desktop-outline" class="text-muted" style="font-size: 2rem;"></ion-icon>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Available Devices Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col me-2">
+                            <div class="text-xs fw-bold text-warning text-uppercase mb-1">
+                                Available Devices
+                            </div>
+                            <div class="h5 mb-0 fw-bold text-light">
+                                {{ status_stats.in_warehouse|default:0 }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <ion-icon name="checkmark-circle-outline" class="text-muted" style="font-size: 2rem;"></ion-icon>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts and Status Row -->
+    <div class="row mb-4">
+        <!-- Device Status Chart -->
+        <div class="col-xl-6 col-lg-6">
+            <div class="card mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 fw-bold text-primary">Device Status Distribution</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for status, count in status_stats.items %}
+                        <div class="col-6 mb-3">
+                            <div class="d-flex align-items-center">
+                                <div class="me-3">
+                                    {% if status == 'in_warehouse' %}
+                                        <span class="badge bg-success">{{ count }}</span>
+                                    {% elif status == 'in_use' %}
+                                        <span class="badge bg-primary">{{ count }}</span>
+                                    {% elif status == 'maintenance' %}
+                                        <span class="badge bg-warning">{{ count }}</span>
+                                    {% elif status == 'damaged' %}
+                                        <span class="badge bg-danger">{{ count }}</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">{{ count }}</span>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <small class="text-muted">
+                                        {% if status == 'in_warehouse' %}In Warehouse
+                                        {% elif status == 'in_use' %}In Use
+                                        {% elif status == 'maintenance' %}Under Maintenance
+                                        {% elif status == 'damaged' %}Damaged
+                                        {% elif status == 'borrowed' %}Borrowed
+                                        {% elif status == 'retired' %}Retired
+                                        {% else %}{{ status|title }}
+                                        {% endif %}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Device Condition Chart -->
+        <div class="col-xl-6 col-lg-6">
+            <div class="card mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 fw-bold text-primary">Device Condition Distribution</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for condition, count in condition_stats.items %}
+                        <div class="col-6 mb-3">
+                            <div class="d-flex align-items-center">
+                                <div class="me-3">
+                                    {% if condition == 'excellent' %}
+                                        <span class="badge bg-success">{{ count }}</span>
+                                    {% elif condition == 'good' %}
+                                        <span class="badge bg-primary">{{ count }}</span>
+                                    {% elif condition == 'fair' %}
+                                        <span class="badge bg-warning">{{ count }}</span>
+                                    {% elif condition == 'poor' or condition == 'damaged' %}
+                                        <span class="badge bg-danger">{{ count }}</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">{{ count }}</span>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <small class="text-muted">{{ condition|title }}</small>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions and Lists Row -->
+    <div class="row">
+        <!-- Quick Actions -->
+        <div class="col-xl-4 col-lg-5">
+            <div class="card mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 fw-bold text-primary">Quick Actions</h6>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        <a href="{% url 'inventory:list_category' %}" class="list-group-item list-group-item-action d-flex align-items-center">
+                            <ion-icon name="pricetags-outline" class="text-primary me-3"></ion-icon> Manage Categories
+                        </a>
+                        <a href="{% url 'inventory:list_item' %}" class="list-group-item list-group-item-action d-flex align-items-center">
+                            <ion-icon name="cube-outline" class="text-success me-3"></ion-icon> Manage Items
+                        </a>
+                        <a href="{% url 'inventory:list_item_unit' %}" class="list-group-item list-group-item-action d-flex align-items-center">
+                            <ion-icon name="desktop-outline" class="text-info me-3"></ion-icon> Manage Devices
+                        </a>
+                        <a href="{% url 'inventory:item_unit_to_excel' %}" class="list-group-item list-group-item-action d-flex align-items-center">
+                            <ion-icon name="document-outline" class="text-success me-3"></ion-icon> Export Devices to Excel
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Category Distribution -->
+            {% if category_stats %}
+            <div class="card mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 fw-bold text-primary">Items by Category</h6>
+                </div>
+                <div class="card-body">
+                    {% for category, count in category_stats.items %}
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-sm">{{ category|default:"Uncategorized" }}</span>
+                        <span class="badge bg-primary">{{ count }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Recent Items and Alerts -->
+        <div class="col-xl-8 col-lg-7">
+            <!-- Maintenance Needed Alert -->
+            {% if maintenance_needed %}
+            <div class="card mb-4">
+                <div class="card-header py-3 bg-warning">
+                    <h6 class="m-0 fw-bold text-dark">
+                        <ion-icon name="warning-outline" class="me-2"></ion-icon> Devices Needing Attention
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Asset Number</th>
+                                    <th>Item</th>
+                                    <th>Status</th>
+                                    <th>Condition</th>
+                                    <th>Location</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for device in maintenance_needed %}
+                                <tr>
+                                    <td>{{ device.asset_number }}</td>
+                                    <td>{{ device.item.name }}</td>
+                                    <td>
+                                        <span class="badge bg-warning">{{ device.get_status_display }}</span>
+                                    </td>
+                                    <td>
+                                        {% if device.condition == 'damaged' or device.condition == 'poor' %}
+                                            <span class="badge bg-danger">{{ device.get_condition_display }}</span>
+                                        {% else %}
+                                            <span class="badge bg-warning">{{ device.get_condition_display }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ device.location }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Recent Items -->
+            {% if recent_items %}
+            <div class="card mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 fw-bold text-primary">Recently Added Items</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>SKU</th>
+                                    <th>Name</th>
+                                    <th>Category</th>
+                                    <th>Brand</th>
+                                    <th>Entry Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in recent_items %}
+                                <tr>
+                                    <td>{{ item.sku_code }}</td>
+                                    <td>{{ item.name }}</td>
+                                    <td>{{ item.category.name }}</td>
+                                    <td>{{ item.brand|default:"-" }}</td>
+                                    <td>{{ item.entry_date|date:"d M Y" }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Available Devices -->
+            {% if available_items %}
+            <div class="card mb-4">
+                <div class="card-header py-3 bg-success">
+                    <h6 class="m-0 fw-bold text-white">
+                        <ion-icon name="checkmark-circle-outline" class="me-2"></ion-icon> Available Devices (Ready to Assign)
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Asset Number</th>
+                                    <th>Item</th>
+                                    <th>Condition</th>
+                                    <th>Location</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for device in available_items %}
+                                <tr>
+                                    <td>{{ device.asset_number }}</td>
+                                    <td>{{ device.item.name }}</td>
+                                    <td>
+                                        <span class="badge bg-success">{{ device.get_condition_display }}</span>
+                                    </td>
+                                    <td>{{ device.location }}</td>
+                                    <td>
+                                        <a href="{% url 'inventory:update_item_unit' device.pk %}" class="btn btn-sm btn-primary">
+                                            <ion-icon name="create-outline" class="me-1"></ion-icon> Assign
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

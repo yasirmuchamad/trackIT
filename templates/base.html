@@ -495,21 +495,21 @@
             </li>
             
             <li class="nav-item">
+              <a class="nav-link {% if current_app == 'inventory' and current_url_name == 'dashboard' %}active{% endif %}" href="{% url 'inventory:dashboard' %}">
+                <ion-icon name="stats-chart-outline"></ion-icon>
+                Inventory Dashboard
+              </a>
+            </li>
+            
+            <li class="nav-item">
               <a class="nav-link {% if current_app == 'inventory' and 'category' in current_url_name %}active{% endif %}" href="{% url 'inventory:list_category' %}">
                 <ion-icon name="create-outline"></ion-icon>
                 Category
               </a>
             </li>
-            
+        
             <li class="nav-item">
-              <a class="nav-link {% if current_app == 'inventory' and 'departement' in current_url_name %}active{% endif %}" href="{% url 'inventory:list_departement' %}">
-                <ion-icon name="business-outline"></ion-icon>
-                Departement
-              </a>
-            </li>
-            
-            <li class="nav-item">
-              <a class="nav-link {% if current_app == 'inventory' and 'employee' in current_url_name %}active{% endif %}" href="{% url 'inventory:list_employee' %}">
+              <a class="nav-link {% if current_app == 'inventory' and 'employee' in current_url_name %}active{% endif %}" href="{% url 'employees:employee_list' %}">
                 <ion-icon name="people-outline"></ion-icon>
                 Employee (Old)
               </a>

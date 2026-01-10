@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-light">
+            <ion-icon name="hardware-chip-outline" class="me-2"></ion-icon> {{ title }}
+        </h1>
+        <div class="btn-group" role="group">
+            <a href="{% url 'inventory:list_asset_item' %}" class="btn btn-secondary btn-sm">
+                <ion-icon name="arrow-back-outline" class="me-1"></ion-icon> Back to Assets
+            </a>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header py-3">
+                    <h6 class="m-0 fw-bold text-primary">Asset Item Information</h6>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <!-- Basic Information Section -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-primary border-bottom pb-2 mb-3">
+                                    <ion-icon name="information-circle-outline" class="me-2"></ion-icon>
+                                    Basic Information
+                                </h6>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.sku_code.id_for_label }}" class="form-label">{{ form.sku_code.label }}</label>
+                                {{ form.sku_code }}
+                                {% if form.sku_code.errors %}
+                                    <div class="text-danger small">{{ form.sku_code.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.category.id_for_label }}" class="form-label">{{ form.category.label }}</label>
+                                {{ form.category }}
+                                {% if form.category.errors %}
+                                    <div class="text-danger small">{{ form.category.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-12 mb-3">
+                                <label for="{{ form.name.id_for_label }}" class="form-label">{{ form.name.label }}</label>
+                                {{ form.name }}
+                                {% if form.name.errors %}
+                                    <div class="text-danger small">{{ form.name.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.brand.id_for_label }}" class="form-label">{{ form.brand.label }}</label>
+                                {{ form.brand }}
+                                {% if form.brand.errors %}
+                                    <div class="text-danger small">{{ form.brand.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.model.id_for_label }}" class="form-label">{{ form.model.label }}</label>
+                                {{ form.model }}
+                                {% if form.model.errors %}
+                                    <div class="text-danger small">{{ form.model.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Technical Specifications Section -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-primary border-bottom pb-2 mb-3">
+                                    <ion-icon name="settings-outline" class="me-2"></ion-icon>
+                                    Technical Specifications
+                                    <small class="text-muted">(Optional - for electronic assets)</small>
+                                </h6>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.cpu.id_for_label }}" class="form-label">{{ form.cpu.label }}</label>
+                                {{ form.cpu }}
+                                {% if form.cpu.errors %}
+                                    <div class="text-danger small">{{ form.cpu.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.ram.id_for_label }}" class="form-label">{{ form.ram.label }}</label>
+                                {{ form.ram }}
+                                {% if form.ram.errors %}
+                                    <div class="text-danger small">{{ form.ram.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.storage.id_for_label }}" class="form-label">{{ form.storage.label }}</label>
+                                {{ form.storage }}
+                                {% if form.storage.errors %}
+                                    <div class="text-danger small">{{ form.storage.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.display.id_for_label }}" class="form-label">{{ form.display.label }}</label>
+                                {{ form.display }}
+                                {% if form.display.errors %}
+                                    <div class="text-danger small">{{ form.display.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-12 mb-3">
+                                <label for="{{ form.os.id_for_label }}" class="form-label">{{ form.os.label }}</label>
+                                {{ form.os }}
+                                {% if form.os.errors %}
+                                    <div class="text-danger small">{{ form.os.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Hidden field for item_type -->
+                        {{ form.item_type }}
+
+                        <!-- Form Actions -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="d-flex justify-content-between">
+                                    <a href="{% url 'inventory:list_asset_item' %}" class="btn btn-secondary">
+                                        <ion-icon name="arrow-back-outline" class="me-1"></ion-icon> Cancel
+                                    </a>
+                                    <button type="submit" class="btn btn-primary">
+                                        <ion-icon name="save-outline" class="me-1"></ion-icon> Save Asset Item
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-generate SKU code based on category and name
+    const categoryField = document.getElementById('category');
+    const nameField = document.getElementById('name');
+    const skuField = document.getElementById('sku_code');
+    
+    function generateSKU() {
+        if (categoryField.selectedOptions.length > 0 && nameField.value) {
+            const categoryText = categoryField.selectedOptions[0].text;
+            const categoryCode = categoryText.substring(0, 3).toUpperCase();
+            const nameCode = nameField.value.substring(0, 3).toUpperCase();
+            const timestamp = Date.now().toString().slice(-4);
+            
+            skuField.value = `${categoryCode}-${nameCode}-${timestamp}`;
+        }
+    }
+    
+    categoryField.addEventListener('change', generateSKU);
+    nameField.addEventListener('blur', generateSKU);
+});
+</script>
+{% endblock %}

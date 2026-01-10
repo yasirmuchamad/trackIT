@@ -1,0 +1,303 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-light">
+            <ion-icon name="swap-horizontal-outline" class="me-2"></ion-icon> {{ title }}
+        </h1>
+        <div class="btn-group" role="group">
+            <a href="{% url 'inventory:create_transaction_in' %}" class="btn btn-success btn-sm">
+                <ion-icon name="arrow-down-outline" class="me-1"></ion-icon> Barang Masuk
+            </a>
+            <a href="{% url 'inventory:create_transaction_out' %}" class="btn btn-primary btn-sm">
+                <ion-icon name="arrow-up-outline" class="me-1"></ion-icon> Barang Keluar
+            </a>
+            <a href="{% url 'inventory:create_transaction_return' %}" class="btn btn-warning btn-sm">
+                <ion-icon name="return-up-back-outline" class="me-1"></ion-icon> Pengembalian
+            </a>
+            <a href="{% url 'inventory:transaction_to_excel' %}" class="btn btn-info btn-sm">
+                <ion-icon name="document-outline" class="me-1"></ion-icon> Export Excel
+            </a>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <ion-icon name="hourglass-outline" class="text-warning" style="font-size: 2rem;"></ion-icon>
+                        </div>
+                        <div>
+            <div class="text-xs fw-bold text-warning text-uppercase mb-1">Pending</div>
+                            <div class="h5 mb-0 fw-bold text-light">
+                                {{ pending_count|default:0 }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <ion-icon name="checkmark-circle-outline" class="text-success" style="font-size: 2rem;"></ion-icon>
+                        </div>
+                        <div>
+                            <div class="text-xs fw-bold text-success text-uppercase mb-1">Completed</div>
+                            <div class="h5 mb-0 fw-bold text-light">{{ completed_count|default:0 }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <ion-icon name="arrow-down-outline" class="text-info" style="font-size: 2rem;"></ion-icon>
+                        </div>
+                        <div>
+                            <div class="text-xs fw-bold text-info text-uppercase mb-1">Barang Masuk</div>
+                            <div class="h5 mb-0 fw-bold text-light">{{ in_count|default:0 }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <ion-icon name="arrow-up-outline" class="text-primary" style="font-size: 2rem;"></ion-icon>
+                        </div>
+                        <div>
+                            <div class="text-xs fw-bold text-primary text-uppercase mb-1">Barang Keluar</div>
+                            <div class="h5 mb-0 fw-bold text-light">{{ out_count|default:0 }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Transactions Table -->
+    <div class="card">
+        <div class="card-header py-3">
+            <h6 class="m-0 fw-bold text-primary">Daftar Transaksi</h6>
+        </div>
+        <div class="card-body">
+            {% if transactions %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>No. Transaksi</th>
+                            <th>Jenis</th>
+                            <th>Tanggal</th>
+                            <th>Item Type</th>
+                            <th>Item</th>
+                            <th>Asset Number / Quantity</th>
+                            <th>Dari/Ke</th>
+                            <th>Status</th>
+                            <th>Dibuat Oleh</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for transaction in transactions %}
+                        <tr>
+                            <td>
+                                <a href="{% url 'inventory:transaction_detail' transaction.pk %}" class="text-decoration-none">
+                                    {{ transaction.transaction_number }}
+                                </a>
+                            </td>
+                            <td>
+                                {% if transaction.transaction_type == 'in' %}
+                                    <span class="badge bg-success">
+                                        <ion-icon name="arrow-down-outline" class="me-1"></ion-icon>
+                                        {{ transaction.get_transaction_type_display }}
+                                    </span>
+                                {% elif transaction.transaction_type == 'out' %}
+                                    <span class="badge bg-primary">
+                                        <ion-icon name="arrow-up-outline" class="me-1"></ion-icon>
+                                        {{ transaction.get_transaction_type_display }}
+                                    </span>
+                                {% elif transaction.transaction_type == 'return' %}
+                                    <span class="badge bg-warning">
+                                        <ion-icon name="return-up-back-outline" class="me-1"></ion-icon>
+                                        {{ transaction.get_transaction_type_display }}
+                                    </span>
+                                {% elif transaction.transaction_type == 'transfer' %}
+                                    <span class="badge bg-info">
+                                        <ion-icon name="swap-horizontal-outline" class="me-1"></ion-icon>
+                                        {{ transaction.get_transaction_type_display }}
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-secondary">{{ transaction.get_transaction_type_display }}</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ transaction.transaction_date|date:"d M Y H:i" }}</td>
+                            <td>
+                                {% if transaction.item_unit %}
+                                    <span class="badge bg-primary">
+                                        <ion-icon name="hardware-chip-outline" class="me-1"></ion-icon>
+                                        Asset
+                                    </span>
+                                {% elif transaction.item %}
+                                    <span class="badge bg-success">
+                                        <ion-icon name="cube-outline" class="me-1"></ion-icon>
+                                        Non-Asset
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Unknown</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if transaction.item_unit %}
+                                    <!-- Asset Item -->
+                                    <div class="fw-bold">{{ transaction.item_unit.item.name }}</div>
+                                    <small class="text-muted">{{ transaction.item_unit.item.brand }} {{ transaction.item_unit.item.model }}</small>
+                                {% elif transaction.item %}
+                                    <!-- Non-Asset Item -->
+                                    <div class="fw-bold">{{ transaction.item.name }}</div>
+                                    <small class="text-muted">{{ transaction.item.brand }} {{ transaction.item.model }}</small>
+                                {% else %}
+                                    <span class="text-muted">Unknown Item</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if transaction.item_unit %}
+                                    <code>{{ transaction.item_unit.asset_number }}</code>
+                                {% elif transaction.item %}
+                                    <span class="badge bg-info">Qty: {{ transaction.quantity }}</span>
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if transaction.transaction_type == 'in' %}
+                                    <small class="text-muted">Ke: {{ transaction.to_location|default:"-" }}</small>
+                                {% elif transaction.transaction_type == 'out' %}
+                                    <small class="text-muted">Ke: {{ transaction.to_employee|default:"-" }}</small>
+                                {% elif transaction.transaction_type == 'return' %}
+                                    <small class="text-muted">Dari: {{ transaction.from_employee|default:"-" }}</small>
+                                {% elif transaction.transaction_type == 'transfer' %}
+                                    <small class="text-muted">{{ transaction.from_location|default:"-" }} → {{ transaction.to_location|default:"-" }}</small>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if transaction.status == 'pending' %}
+                                    <span class="badge bg-warning">
+                                        <ion-icon name="hourglass-outline" class="me-1"></ion-icon>
+                                        {{ transaction.get_status_display }}
+                                    </span>
+                                {% elif transaction.status == 'approved' %}
+                                    <span class="badge bg-info">
+                                        <ion-icon name="checkmark-outline" class="me-1"></ion-icon>
+                                        {{ transaction.get_status_display }}
+                                    </span>
+                                {% elif transaction.status == 'completed' %}
+                                    <span class="badge bg-success">
+                                        <ion-icon name="checkmark-circle-outline" class="me-1"></ion-icon>
+                                        {{ transaction.get_status_display }}
+                                    </span>
+                                {% elif transaction.status == 'cancelled' %}
+                                    <span class="badge bg-danger">
+                                        <ion-icon name="close-circle-outline" class="me-1"></ion-icon>
+                                        {{ transaction.get_status_display }}
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <small>{{ transaction.requested_by.username|default:"-" }}</small>
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <a href="{% url 'inventory:transaction_detail' transaction.pk %}" class="btn btn-outline-primary btn-sm">
+                                        <ion-icon name="eye-outline"></ion-icon>
+                                    </a>
+                                    {% if transaction.status == 'pending' and user.is_staff %}
+                                        <a href="{% url 'inventory:approve_transaction' transaction.pk %}" class="btn btn-outline-success btn-sm" 
+                                           onclick="return confirm('Setujui transaksi ini?')">
+                                            <ion-icon name="checkmark-outline"></ion-icon>
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if is_paginated %}
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1">First</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                        </li>
+                    {% endif %}
+
+                    <li class="page-item active">
+                        <span class="page-link">
+                            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                        </span>
+                    </li>
+
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+
+            {% else %}
+            <div class="text-center py-5">
+                <ion-icon name="document-outline" class="text-muted" style="font-size: 4rem;"></ion-icon>
+                <h5 class="text-muted mt-3">Belum ada transaksi</h5>
+                <p class="text-muted">
+                    {% if not transactions %}
+                        Sistem transaksi belum diinisialisasi. Silakan jalankan migration terlebih dahulu:
+                        <br><code>python manage.py migrate inventory</code>
+                    {% else %}
+                        Mulai dengan membuat transaksi barang masuk atau keluar.
+                    {% endif %}
+                </p>
+                {% if transactions is not None %}
+                <div class="mt-3">
+                    <a href="{% url 'inventory:create_transaction_in' %}" class="btn btn-success me-2">
+                        <ion-icon name="arrow-down-outline" class="me-1"></ion-icon> Barang Masuk
+                    </a>
+                    <a href="{% url 'inventory:create_transaction_out' %}" class="btn btn-primary">
+                        <ion-icon name="arrow-up-outline" class="me-1"></ion-icon> Barang Keluar
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

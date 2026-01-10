@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-light">
+            <ion-icon name="cube-outline" class="me-2"></ion-icon> {{ title }}
+        </h1>
+        <div class="btn-group" role="group">
+            <a href="{% url 'inventory:create_non_asset_item' %}" class="btn btn-success btn-sm">
+                <ion-icon name="add-outline" class="me-1"></ion-icon> Add Non-Asset Item
+            </a>
+            <a href="{% url 'inventory:list_item' %}" class="btn btn-secondary btn-sm">
+                <ion-icon name="list-outline" class="me-1"></ion-icon> All Items
+            </a>
+            <a href="{% url 'inventory:list_asset_item' %}" class="btn btn-primary btn-sm">
+                <ion-icon name="hardware-chip-outline" class="me-1"></ion-icon> Assets
+            </a>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        {% if migration_needed %}
+        <div class="col-12 mb-3">
+            <div class="alert alert-warning" role="alert">
+                <h6 class="alert-heading">
+                    <ion-icon name="warning-outline" class="me-2"></ion-icon>
+                    Migration Required
+                </h6>
+                <p class="mb-2">The Asset/Non-Asset feature requires database migration. Please run:</p>
+                <code>python manage.py migrate inventory</code>
+                <hr>
+                <p class="mb-0">After migration, you'll be able to create and manage Non-Asset items with inventory management features.</p>
+            </div>
+        </div>
+        {% endif %}
+        
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <ion-icon name="cube-outline" class="text-success" style="font-size: 2rem;"></ion-icon>
+                        </div>
+                        <div>
+                            <div class="text-xs fw-bold text-success text-uppercase mb-1">Total Non-Assets</div>
+                            <div class="h5 mb-0 fw-bold text-light">
+                                {% if migration_needed %}
+                                    <small class="text-muted">Migration needed</small>
+                                {% else %}
+                                    {{ items|length }}
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Items Table -->
+    <div class="card">
+        <div class="card-header py-3">
+            <h6 class="m-0 fw-bold text-primary">Non-Asset Items</h6>
+        </div>
+        <div class="card-body">
+            {% if items %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>SKU Code</th>
+                            <th>Name</th>
+                            <th>Category</th>
+                            <th>Brand</th>
+                            <th>Model</th>
+                            <th>Unit</th>
+                            <th>Min Stock</th>
+                            <th>Entry Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in items %}
+                        <tr>
+                            <td><code>{{ item.sku_code }}</code></td>
+                            <td>
+                                <div class="fw-bold">{{ item.name }}</div>
+                                <small class="badge bg-success">Non-Asset</small>
+                            </td>
+                            <td>{{ item.category.name }}</td>
+                            <td>{{ item.brand|default:"-" }}</td>
+                            <td>{{ item.model|default:"-" }}</td>
+                            <td>
+                                {% if item.unit_of_measure %}
+                                    <span class="badge bg-info">{{ item.unit_of_measure }}</span>
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if item.minimum_stock %}
+                                    <span class="badge bg-warning">{{ item.minimum_stock }}</span>
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td>{{ item.entry_date|date:"d M Y" }}</td>
+                            <td>
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <a href="{% url 'inventory:update_non_asset_item' item.pk %}" class="btn btn-outline-success btn-sm">
+                                        <ion-icon name="create-outline"></ion-icon>
+                                    </a>
+                                    <a href="{% url 'inventory:delete_item' item.pk %}" class="btn btn-outline-danger btn-sm"
+                                       onclick="return confirm('Delete this non-asset item?')">
+                                        <ion-icon name="trash-outline"></ion-icon>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <ion-icon name="cube-outline" class="text-muted" style="font-size: 4rem;"></ion-icon>
+                <h5 class="text-muted mt-3">No Non-Asset Items</h5>
+                <p class="text-muted">Start by creating your first non-asset item.</p>
+                <a href="{% url 'inventory:create_non_asset_item' %}" class="btn btn-success">
+                    <ion-icon name="add-outline" class="me-1"></ion-icon> Create Non-Asset Item
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

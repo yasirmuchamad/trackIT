@@ -1,0 +1,223 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-light">
+            <ion-icon name="arrow-down-outline" class="me-2"></ion-icon> {{ title }}
+        </h1>
+        <a href="{% url 'inventory:list_transaction' %}" class="btn btn-secondary btn-sm">
+            <ion-icon name="arrow-back-outline" class="me-1"></ion-icon> Kembali ke Daftar
+        </a>
+    </div>
+
+    <!-- Form Card -->
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header py-3 bg-success">
+                    <h6 class="m-0 fw-bold text-white">
+                        <ion-icon name="arrow-down-outline" class="me-2"></ion-icon>
+                        Form Barang Masuk
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <!-- Item Selection -->
+                        <div class="alert alert-info mb-4">
+                            <h6 class="alert-heading">
+                                <ion-icon name="information-circle-outline" class="me-2"></ion-icon>
+                                Pilih Jenis Item
+                            </h6>
+                            <p class="mb-0">Pilih <strong>Asset Item</strong> untuk barang yang dapat dilacak secara individual (laptop, printer, dll) atau <strong>Non-Asset Item</strong> untuk barang consumable (kertas, tinta, dll).</p>
+                        </div>
+
+                        <!-- Asset Item Selection -->
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <label for="{{ form.item_unit.id_for_label }}" class="form-label fw-bold">
+                                    {{ form.item_unit.label }}
+                                </label>
+                                {{ form.item_unit }}
+                                {% if form.item_unit.help_text %}
+                                    <div class="form-text">{{ form.item_unit.help_text }}</div>
+                                {% endif %}
+                                {% if form.item_unit.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.item_unit.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Non-Asset Item Selection -->
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <label for="{{ form.item.id_for_label }}" class="form-label fw-bold">
+                                    {{ form.item.label }}
+                                </label>
+                                {{ form.item }}
+                                {% if form.item.help_text %}
+                                    <div class="form-text">{{ form.item.help_text }}</div>
+                                {% endif %}
+                                {% if form.item.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.item.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Quantity and Location -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="{{ form.quantity.id_for_label }}" class="form-label fw-bold">
+                                    {{ form.quantity.label }}
+                                    <span class="text-danger">*</span>
+                                </label>
+                                {{ form.quantity }}
+                                {% if form.quantity.help_text %}
+                                    <div class="form-text">{{ form.quantity.help_text }}</div>
+                                {% endif %}
+                                {% if form.quantity.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.quantity.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="{{ form.to_location.id_for_label }}" class="form-label fw-bold">
+                                    {{ form.to_location.label }}
+                                    <span class="text-danger">*</span>
+                                </label>
+                                {{ form.to_location }}
+                                {% if form.to_location.help_text %}
+                                    <div class="form-text">{{ form.to_location.help_text }}</div>
+                                {% endif %}
+                                {% if form.to_location.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.to_location.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Reason -->
+                        <div class="mb-3">
+                            <label for="{{ form.reason.id_for_label }}" class="form-label fw-bold">
+                                {{ form.reason.label }}
+                                <span class="text-danger">*</span>
+                            </label>
+                            {{ form.reason }}
+                            {% if form.reason.help_text %}
+                                <div class="form-text">{{ form.reason.help_text }}</div>
+                            {% endif %}
+                            {% if form.reason.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.reason.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Notes -->
+                        <div class="mb-4">
+                            <label for="{{ form.notes.id_for_label }}" class="form-label fw-bold">
+                                {{ form.notes.label }}
+                            </label>
+                            {{ form.notes }}
+                            {% if form.notes.help_text %}
+                                <div class="form-text">{{ form.notes.help_text }}</div>
+                            {% endif %}
+                            {% if form.notes.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.notes.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Form Errors -->
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {% for error in form.non_field_errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <!-- Submit Buttons -->
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'inventory:list_transaction' %}" class="btn btn-secondary">
+                                <ion-icon name="arrow-back-outline" class="me-1"></ion-icon> Batal
+                            </a>
+                            <button type="submit" class="btn btn-success">
+                                <ion-icon name="save-outline" class="me-1"></ion-icon> Simpan Transaksi
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Info Card -->
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h6 class="fw-bold text-info">
+                        <ion-icon name="information-circle-outline" class="me-2"></ion-icon>
+                        Informasi Barang Masuk
+                    </h6>
+                    <ul class="mb-0">
+                        <li><strong>Asset Items:</strong> Barang yang dapat dilacak individual seperti laptop, printer, komputer</li>
+                        <li><strong>Non-Asset Items:</strong> Barang consumable seperti kertas, tinta, kabel, dll</li>
+                        <li>Item akan otomatis diset ke status "In Warehouse" setelah transaksi disetujui</li>
+                        <li>Pastikan lokasi tujuan sudah benar sebelum menyimpan</li>
+                        <li>Transaksi akan menunggu persetujuan dari admin sebelum dieksekusi</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const itemUnitField = document.getElementById('id_item_unit');
+    const itemField = document.getElementById('id_item');
+    
+    function toggleFields() {
+        // If asset item is selected, clear non-asset item
+        if (itemUnitField && itemUnitField.value) {
+            if (itemField) itemField.value = '';
+        }
+        
+        // If non-asset item is selected, clear asset item
+        if (itemField && itemField.value) {
+            if (itemUnitField) itemUnitField.value = '';
+        }
+    }
+    
+    // Add event listeners
+    if (itemUnitField) itemUnitField.addEventListener('change', toggleFields);
+    if (itemField) itemField.addEventListener('change', toggleFields);
+    
+    // Initial toggle
+    toggleFields();
+});
+</script>
+{% endblock %}
